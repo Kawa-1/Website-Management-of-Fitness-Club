@@ -1,0 +1,9 @@
+postgres:
+  driver: 1
+  dbname: fitness
+  user: postgres
+  password: gAAAAABh5brbDx0gUnorUfPFNluVT-qceniNOw_oXWMGwfeEqDEFitYh-kddYo0LVFCtPOdlBY_d6vHWhR1FqU495KdDF1LUQg==
+  host: 127.0.0.1
+  port: 5432
+flask:
+  port: 5000

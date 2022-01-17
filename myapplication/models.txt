@@ -1,0 +1,89 @@
+BEGIN;
+CREATE TABLE IF NOT EXISTS "users" (
+  "id" SERIAL PRIMARY KEY,
+  "first_name" varchar,
+  "last_name" varchar,
+  "created_at" timestamp,
+  "city" varchar,
+  "street" varchar,
+  "house_number" varchar,
+  "postcode" varchar,
+  "email" varchar,
+  "password" varchar,
+  CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
+);
+
+CREATE TABLE IF NOT EXISTS "instructors" (
+  "id" SERIAL PRIMARY KEY,
+  "first_name" varchar,
+  "last_name" varchar,
+  "city" varchar,
+  "street" varchar,
+  "house_number" varchar,
+  "postcode" varchar,
+  "email" varchar,
+  "password" varchar,
+  CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9]+@[A-Za-z0-9]+[.][A-Za-z]+$')
+);
+
+CREATE TABLE IF NOT EXISTS "classes" (
+  "id" SERIAL PRIMARY KEY,
+  "date" timestamp,
+  "type" integer,
+  "name" varchar,
+  "instructor_id" integer,
+  "facility_id" integer,
+  "price_id" integer
+);
+
+CREATE TABLE IF NOT EXISTS "participation" (
+  "id" SERIAL PRIMARY KEY,
+  "user_id" integer,
+  "class_id" integer
+);
+
+CREATE TABLE IF NOT EXISTS "subscription" (
+  "id" SERIAL PRIMARY KEY,
+  "type" integer,
+  "user_id" integer,
+  "facility_id" integer,
+  "start_date" timestamp,
+  "end_date" timestamp,
+  "price_id" integer
+);
+
+CREATE TABLE IF NOT EXISTS "facilities" (
+  "id" SERIAL PRIMARY KEY,
+  "city" varchar,
+  "street" varchar,
+  "house_number" varchar,
+  "postcode" varchar,
+  "contact_number" varchar,
+  "contact_number_2" varchar,
+  "email" varchar,
+  CONSTRAINT proper_email CHECK (email ~* '^[A-Za-z0-9]+@[A-Za-z0-9]+[.][A-Za-z]+$')
+);
+
+CREATE TABLE IF NOT EXISTS "price_list" (
+  "id" SERIAL PRIMARY KEY,
+  "type" integer,
+  "price" integer
+);
+
+ALTER TABLE "subscription" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "subscription" ADD FOREIGN KEY ("facility_id") REFERENCES "facilities" ("id");
+
+ALTER TABLE "participation" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "participation" ADD FOREIGN KEY ("class_id") REFERENCES "classes" ("id");
+
+ALTER TABLE "classes" ADD FOREIGN KEY ("instructor_id") REFERENCES "instructors" ("id");
+
+ALTER TABLE "classes" ADD FOREIGN KEY ("facility_id") REFERENCES "facilities" ("id");
+
+ALTER TABLE "subscription" ADD FOREIGN KEY ("price_id") REFERENCES "price_list" ("id");
+
+ALTER TABLE "classes" ADD FOREIGN KEY ("price_id") REFERENCES "price_list" ("id");
+
+COMMIT;
