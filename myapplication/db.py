@@ -17,7 +17,8 @@ def init_tables():
     with open(_path) as file:
         tables = file.read()
 
-    get_cursor().execute(tables)
+    # g.cursor == get_cursor()
+    g.cursor.execute(tables)
     commit()
     db_close()
 
