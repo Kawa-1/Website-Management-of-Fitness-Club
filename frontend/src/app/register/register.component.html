@@ -1,0 +1,51 @@
+<div class="page-title">
+    <h2>Register</h2>
+    <p class="lead">
+    </p>
+</div>
+
+<div class="form-stuff">
+    <form method="POST" #UserRegisatrationForm="ngForm" autocomplete="off">
+        <div class="form-group">
+            <div class="input-field">
+            <input required maxlength="50" ngModel name="email" #email="ngModel" type="email" class="form-control validate text email required" placeholder="Email">
+            <label for="email" data-error="Invalid email"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required minlength="3" maxlength="20" ngModel name="firstName" #firstName="ngModel" type="text" id="firstName" class="form-control validate" placeholder="First name" >
+            <label for="firstName" [attr.data-error]="firstName.errors != null?(firstName.errors.required? 'Required Field' :'Minimum 3 characters needed'):''"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required minlength="3" maxlength="20" ngModel name="lastName" #lastName="ngModel" type="text" id="lastName" class="form-control validate" placeholder="Last name" >
+            <label for="lastName" [attr.data-error]="lastName.errors != null?(lastName.errors.required? 'Required Field' :'Minimum 3 characters needed'):''"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required minlength="3" maxlength="20" ngModel name="username" #username="ngModel" type="text" id="username" class="form-control validate" placeholder="Username" >
+            <label for="username" [attr.data-error]="username.errors != null?(username.errors.required? 'Required Field' :'Minimum 3 characters needed'):''"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required minlength="3" maxlength="20" ngModel name="password" #password="ngModel" type="password" id="password" class="form-control validate" placeholder="Password" (change)="getPassword(password.value)" >
+            <label for="password" [attr.data-error]="password.errors != null?(password.errors.required? 'Required Field' :'Minimum 3 characters needed'):''"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required minlength="3" maxlength="20" ngModel name="repeatPassword" #repeatPassword="ngModel" type="password" id="repeatPassword" class="form-control validate" placeholder="Repeat password" [pattern]="passwordPattern" >
+            <label for="repeatPassword" data-error="Password must match"></label>    
+            </div>
+        </div>
+        <button class="btn btn-primary" (click)="clicked(email.value, firstName.value, lastName.value, username.value, password.value, repeatPassword.value)" [disabled]="!UserRegisatrationForm.valid || isDisabled">Register</button>
+        <br>
+        <div class="recaptcha-style">
+            <app-recaptcha (callParent)="getMsgFromBaby()"></app-recaptcha>
+        </div>                          
+    </form>
+</div>  

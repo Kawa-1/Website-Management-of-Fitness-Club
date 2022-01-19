@@ -1,0 +1,25 @@
+<div class="page-title">
+    <h2>Login</h2>
+    <p class="lead">
+    </p>
+</div>
+
+<div class="form-stuff">
+    <form method="POST" #UserRegisatrationForm="ngForm" autocomplete="off">
+        <div class="form-group">
+            <div class="input-field">
+            <input required ngModel name="email" #email="ngModel" type="text" id="email" class="form-control validate" placeholder="Email">
+            <label for="email" data-error="Required field!"></label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-field">
+            <input required ngModel name="password" #password="ngModel" type="password" id="password" class="form-control validate" placeholder="Password">
+            <label for="password" data-error="Required field!"></label>
+            </div>
+        </div>
+        <button class="btn btn-primary" (click)="clicked(email.value, password.value)" [disabled]="!UserRegisatrationForm.valid">Login</button>
+        <br>
+    </form>
+</div>
+

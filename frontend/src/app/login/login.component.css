@@ -1,0 +1,14 @@
+.form-stuff{
+    padding-top: 100px;
+    padding-right: 800px;
+    padding-left: 800px;
+}
+
+.form-group{
+    padding-bottom: 15px;
+}
+
+.btn-primary{
+    width: 130px;
+    height: 40px;
+}
