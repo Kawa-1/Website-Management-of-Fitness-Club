@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 def init_tables():
+    """Init tables using model.txt"""
     _path = ''
     basedir = Path(__file__).parent.absolute()
     if platform.system() == 'Darwin':
