@@ -2,13 +2,14 @@ from myapplication.logger import get_logger
 from myapplication.config import YamlConf
 from myapplication.security import CryptoKey
 # from myapplication.db import db_before_request, db_init_app, get_cursor, init_tables
-from flask import Flask, jsonify, g, request, json
+from flask import Flask, jsonify, g, request, json, current_app
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from flask_migrate import Migrate
 from werkzeug.exceptions import HTTPException
 from datetime import datetime
+from myapplication.error_handler.err_handler import error_handler
 
 
 log = get_logger(__name__)
@@ -16,6 +17,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app():
+    printer("\tWELCOME SERVER FLASK!!!")
     #log.info("Starting server...")
     app = Flask(__name__)
     api = Api(app)
@@ -37,32 +39,19 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://postgres:{app.config['DB_PASSWORD']}@localhost:5432/fitness"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    #db.engine.execute("grant usage on schema public to public;")
-    #db.engine.execute("grant create on schema public to public;")
 
-    from myapplication.models import Users, Instructors, Facilities, Subscriptions, PriceList, Classes, Participation
+    from myapplication.models import Users, Facilities, Subscriptions, PriceList, Classes, Participation
     db.init_app(app)
     migrate.init_app(app, db)
     db.create_all(app=app)
 
-    #db_init_app(app) Tu jest błąd musimy go rozwiązać elo
+    app.register_error_handler(HTTPException, error_handler)
 
-    #app.before_request(db_before_request)
+    from myapplication.api.auth.api import RegisterUserApi
+    api.add_resource(RegisterUserApi, '/api/register')
 
-    @app.errorhandler(HTTPException)
-    def not_found(e):
-        time = datetime.now()
-        time = time.strftime("%Y-%m-%d %H:%M:%S")
-        dictionary = {'errors': [{'timestamp': str(time), 'status': int(e.code), 'description': str(e.description),
-                                  "name": str(e.name), "method": request.method, "path": request.full_path,
-                                  "args": request.args, "host": request.host_url, "url": request.url}]}
-        api_body = json.dumps(dictionary)
-        response = e.get_response()
-        response.data = api_body
-        response.content_type = "application/json"
-        response.code = e.code
-        response.content_language = "en"
-        return response
+    from myapplication.api.activities.classes import ActivityApi
+    api.add_resource(ActivityApi, "/api/activity/<string:date>")
 
     @app.route('/', methods=['GET'])
     def hello():
@@ -71,6 +60,7 @@ def create_app():
 
     @app.route('/hello', methods=['GET'])
     def hello_world():
+        x = 1
         #init_tables()
         #x = get_cursor().execute("""SELECT * FROM users""")
         #print(x)
@@ -78,6 +68,24 @@ def create_app():
 
     return app
 
+def star(func):
+    def inner(*args, **kwargs):
+        print('*' * 60)
+        func(*args, **kwargs)
+        print('*' * 60)
+    return inner
+
+def percent(func):
+    def inner(*args, **kwargs):
+        print('%' * 60)
+        func(*args, **kwargs)
+        print('%' * 60)
+    return inner
+
+@star
+@percent
+def printer(msg):
+    print(msg)
 
 # request.method:              GET
 # request.url:                 http://127.0.0.1:5000/alert/dingding/test?x=y

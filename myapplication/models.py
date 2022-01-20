@@ -7,6 +7,7 @@ class Users(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
+    # 1 - is instructor; 0 - not instructor
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     city = db.Column(db.String(100), nullable=False)
@@ -15,27 +16,29 @@ class Users(db.Model):
     postcode = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(600), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    is_instructor = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user_participations = db.relationship('Participation', backref='user_participations', lazy=True)
-    user_subscriptions = db.relationship('Subscription', backref='user_subscriptions', lazy=True)
+    user_subscriptions = db.relationship('Subscriptions', backref='user_subscriptions', lazy=True)
+    user_instructor_classes = db.relationship('Classes', backref='user_instructor_classes', lazy=True)
 
 
-class Instructors(db.Model):
-    __tablename__ = 'instructors'
-    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
-
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
-    city = db.Column(db.String(100), nullable=False)
-    street = db.Column(db.String(100), nullable=False)
-    house_number = db.Column(db.Integer, nullable=False)
-    postcode = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(600), nullable=False)
-
-    instructor_classes = db.relationship('Classes', backref='instructor_classes', lazy=True)
+# class Instructors(db.Model):
+#     __tablename__ = 'instructors'
+#     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
+#
+#     id = db.Column(db.Integer, primary_key=True)
+#     first_name = db.Column(db.String(100), nullable=False)
+#     last_name = db.Column(db.String(100), nullable=False)
+#     city = db.Column(db.String(100), nullable=False)
+#     street = db.Column(db.String(100), nullable=False)
+#     house_number = db.Column(db.Integer, nullable=False)
+#     postcode = db.Column(db.String(100), nullable=False)
+#     email = db.Column(db.String(100), nullable=False, unique=True)
+#     password = db.Column(db.String(600), nullable=False)
+#
+#     instructor_classes = db.relationship('Classes', backref='instructor_classes', lazy=True)
 
 
 class Facilities(db.Model):
@@ -82,10 +85,11 @@ class Classes(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    date = db.Column(db.String, nullable=False, default=datetime.now().strftime("%Y-%m-%d %H-%M"))
     type_of_classes = db.Column(db.String(100), nullable=False)
 
-    instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
+    #instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
+    instructor_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     facility_id = db.Column(db.Integer, db.ForeignKey('fit.facilities.id'))
     price_id = db.Column(db.Integer, db.ForeignKey('fit.price_list.id'))
 
