@@ -14,7 +14,7 @@ class Singleton(type):
 
 
 class CryptoKey(metaclass=Singleton):
-    """Singleton class which main role is to generate key (symmetric encryption) for conf.yaml"""
+    """Singleton class which main role is to generate key (symmetric encryption) for conf_X.yaml"""
     def __init__(self):
         """
         PARAMETERS:

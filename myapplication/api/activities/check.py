@@ -7,3 +7,20 @@ def check_date_format(date):
         return True
     else:
         return False
+
+def check_year_format(year):
+    regex = "^[0-9]{4]"
+    year = str(year)
+    if re.search(regex, year):
+        return True
+    else:
+        return False
+
+def check_month_format(month):
+    regex = "^[0-9]{4}[-][0-9]{2}$"
+    month = str(month)
+    if re.search(regex, month):
+        return True
+    else:
+        return False
+

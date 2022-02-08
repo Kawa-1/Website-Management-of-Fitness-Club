@@ -1,0 +1,8 @@
+mail:
+  mail_server: my_server
+  mail_username: username
+  # password = admin1
+  mail_password: gAAAAABiAPdTi0xFO3VqRUB1jtkMuv1we4_rOwJ1y4AAjNq2bOqVDooJ04cZ1r013r-Iol-Iuskrwl3_PqfUbDy-ptCh8oHCbQ==
+  mail_port: 465
+  mail_use_ssl: True
+  mail_use_tls: False

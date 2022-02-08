@@ -7,7 +7,6 @@ class Users(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    # 1 - is instructor; 0 - not instructor
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     city = db.Column(db.String(100), nullable=False)
@@ -16,8 +15,10 @@ class Users(db.Model):
     postcode = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(600), nullable=False)
+    # 1 - is instructor; 0 - not instructor
     is_instructor = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    #confirmed = db.Column(db.Boolean, default=False)
 
     user_participations = db.relationship('Participation', backref='user_participations', lazy=True)
     user_subscriptions = db.relationship('Subscriptions', backref='user_subscriptions', lazy=True)
