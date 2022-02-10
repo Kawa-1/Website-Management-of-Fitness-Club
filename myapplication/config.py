@@ -43,8 +43,8 @@ class YamlConf:
         return data
 
     @staticmethod
-    def get_yaml_mail(): -> dict:
-    """Getting parameters involved with configuration of mail server and user
+    def get_yaml_mail() -> dict:
+        """Getting parameters involved with configuration of mail server and user
 
         PARAMETERS:
             None
@@ -57,15 +57,15 @@ class YamlConf:
                     - mail_port: int
                     - mail_use_ssl: bool
                     - mail_use_tls: bool
-    """
+        """
 
-    file_yaml = YamlConf.get_path_conf("config_mail.yaml")
-    with open(file_yaml, mode='r') as f_handler:
-        data = yaml.safe_load(f_handler)
+        file_yaml = YamlConf.get_path_conf("config_mail.yaml")
+        with open(file_yaml, mode='r') as f_handler:
+            data = yaml.safe_load(f_handler)
 
-    data = data['mail']
+        data = data['mail']
 
-    return data
+        return data
 
 
 #print(YamlConf.get_yaml_postgres("config_pg.yaml"))

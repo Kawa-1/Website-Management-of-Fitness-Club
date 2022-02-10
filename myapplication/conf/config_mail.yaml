@@ -1,6 +1,6 @@
 mail:
-  mail_server: my_server
-  mail_username: username
+  mail_server: smtp.fitness.com
+  mail_username: fitness_management
   # password = admin1
   mail_password: gAAAAABiAPdTi0xFO3VqRUB1jtkMuv1we4_rOwJ1y4AAjNq2bOqVDooJ04cZ1r013r-Iol-Iuskrwl3_PqfUbDy-ptCh8oHCbQ==
   mail_port: 465

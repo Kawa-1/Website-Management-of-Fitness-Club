@@ -1,17 +1,19 @@
+import jwt
 from flask_restful import Resource, request, current_app
-from datetime import datetime
-from flask import json
+from datetime import datetime, timedelta
+from flask import json, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from myapplication.api.auth.auth import check_email, check_postcode, check_number, sanitize
+from bleach import clean
+from myapplication.api.auth.auth import check_email, check_postcode, check_number, send_email_confirm, token_required
 from myapplication import db
-from myapplication.models import Users
+from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
 
 
 class RegisterUserApi(Resource):
     def post(self):
-        err_resp = {"errors": [{"description": "Provided empty field, bad semantics, something exists so far etc.",
-                                "method": "POST", "name": "Failed registration", "status": 400, "timestamp": datetime.now()}]}
+        err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
+                                "method": "POST", "name": "Failed registration", "status": 400, "timestamp": datetime.utcnow()}}
         err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 
         first_name = request.form.get("first_name")
@@ -32,46 +34,240 @@ class RegisterUserApi(Resource):
         cmd = 'SELECT * FROM fit.users WHERE users.email=\'%s\'' % email
         user = db.session.execute(cmd).cursor.fetchone()
         print(user)
-        if check_email(email) is False or user:
-            return err_resp
+        if check_email(email) is False:
+            err_resp = {"errors": {"description": "Format of email is incorrect",
+                                    "method": "POST", "name": "Failed registration", "status": 400,
+                                    "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+        if user:
+            err_resp = {"message": {"description": "Such user already exists",
+                                    "method": "POST", "name": "Failed registration", "status": 400,
+                                    "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
-            return err_resp
+            return err_resp, 400
 
         if check_postcode(postcode) is False:
-            return err_resp
+            return err_resp, 400
 
         if password != repeat_password:
-            return err_resp
+            return err_resp, 400
 
         if check_number(house_number) is False:
-            return err_resp
+            return err_resp, 400
 
-        first_name = sanitize(first_name)
-        last_name = sanitize(last_name)
-        city = sanitize(city)
-        street = sanitize(street)
-        house_number = sanitize(house_number)
-        postcode = sanitize(postcode)
-        email = sanitize(email)
-        password = sanitize(password)
+        first_name = clean(first_name)
+        last_name = clean(last_name)
+        city = clean(city)
+        street = clean(street)
+        house_number = clean(house_number)
+        postcode = clean(postcode)
+        email = clean(email)
+        password = clean(password)
+
 
         password = generate_password_hash(password)
         new_user = Users(first_name=first_name, last_name=last_name, city=city, street=street, house_number=house_number,
                          postcode=postcode, email=email, password=password)
+        send = send_email_confirm(email)
+
+        if send[0] is False:
+            err_resp = {"message": {"description": "Confrimation email could not be send", "error": "Mail was not sent",
+                         "method": "POST", "name": send[1], "status": 500,
+                         "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 500
+
         db.session.add(new_user)
         db.session.commit()
 
-        created_resp = {"information": [{"description": "new user created", "status": 201, "name": "registration", "method": "POST",
-                                "timestamp": datetime.now()}], "user": [{"first_name": first_name, "last_name": last_name}]}
+        created_resp = {"message": {"description": "new user created", "confirmation_email": send[1], "status": 201,
+                                     "name": "registration", "method": "POST", "timestamp": datetime.utcnow()}, "user":
+            {"first_name": first_name, "last_name": last_name, "confirmed": False}}
         created_resp = json.dumps(created_resp, indent=4, sort_keys=True)
-
         return created_resp, 201
 
 
+class SendEmailConfirmationApi(Resource):
+    def post(self):
+        email = request.headers.get('email')
+        if email is None or not check_email(email):
+            err_resp = {"message": {"description": "Bad format of email", "confirmation_email": "Has not been sent", "status": 400,
+                                        "name": "email confirmation; error", "method": "POST", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+        send = send_email_confirm(email)
+        if send[0] is False:
+            err_resp = {"message": {"description": "Mail has not been sent", "confirmation_email": "Has not been sent",
+                                    "status": 400, "name": send[1], "method": "POST", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+        resp = {"message": {"description": "Confirmation mail has been sent", "confirmation_email": send[1], "status": 200,
+                                     "name": "confirmation of account", "method": "POST", "timestamp": datetime.utcnow()}}
+        resp = json.dumps(resp, indent=4, sort_keys=True)
+        return resp, 200
+
+
+class ConfirmEmail(Resource):
+    def get(self, token=None):
+        token: str
+        try:
+            email = current_app.config['SAFE_EMAIL']
+            email = email.loads(token, salt='email-confirm', max_age=3600)
+            cmd = 'UPDATE fit.users SET users.confirmed=1 WHERE users.email=\'%s\'' % email
+            db.session.execute(cmd)
+            db.session.commit()
+            resp = {"message": {"description": "Account has been confirmed", "status": 200, "email": email,
+                                     "name": "confirm_email", "method": "GET", "timestamp": datetime.utcnow()}}
+            resp = json.dumps(resp, indent=4, sort_keys=True)
+            return resp, 200
+
+        except Exception as e:
+            err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
+                                     "name": e, "method": "GET", "timestamp": datetime.utcnow()}]}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+
 class LoginUserApi(Resource):
-    pass
+    def post(self):
+        post_data = request.get_json()
+        key = current_app.config['SECRET_KEY']
+
+        email = post_data.get('email')
+        password = post_data.get('password')
+
+        user = Users.query.filter_by(email=email).first()
+
+        if not user or not check_password_hash(user.password, password):
+            err_resp = {"message": {"description": "Such user doesn't exist, password is incorrect",
+                                    "name": "Could not log into", "method": "POST", "status": 400, "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+        if user.confirmed == 0:
+            err_resp = {"message": {"description": "This account has not been confirmed yet",
+                                    "name": "Could not log into", "method": "POST", "status": 400}, "timestamp": datetime.utcnow()}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+
+        token = jwt.encode({"id": user.id, "email": user.email, "first_name": user.first_name, "last_name": user.last_name,
+                            "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
+
+        resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
+                            "timestamp": datetime.utcnow()}}
+        resp = json.dumps(resp, indent=4, sort_keys=True)
+        return resp, 201
+
+
+class LogoutUserApi(Resource):
+    @token_required
+    def post(self):
+        post_data = request.get_json()
+        auth_token = post_data.get('x-access-tokens')
+        email_current_user = post_data.get('email')
+        try:
+            data = jwt.decode(auth_token, current_app.config['SECRET_KEY'])
+        except Exception as e:
+            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
+                                    "method": "POST", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 401
+
+        if email_current_user is None or data['email'] != email_current_user:
+            err_resp = {"message": {"description": "This token doesn't belong to this user", "status": 403, "name": "Failed blacklisting of token",
+                                    "method": "POST", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 403
+
+        if auth_token:
+            if BlackListToken.check_blacklist(auth_token):
+                if isinstance(auth_token, str):
+                    blacklist_token = BlackListToken(token=auth_token)
+
+                    db.session.add(blacklist_token)
+                    db.session.commit()
+                    resp = {"message": {"description": "User has been logged out", "status": 200, "name": "Token is blacklisted",
+                                        "method": "POST", "timestamp": datetime.utcnow()}}
+                    resp = json.dumps(resp, indent=4, sort_keys=True)
+                    return resp, 200
+
+                else:
+                    err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
+                                        "name": "Token is invalid",
+                                        "method": "POST", "timestamp": datetime.utcnow()}}
+                    err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                    return err_resp, 400
+
+            else:
+                err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
+                                        "name": "Token is already in blacklist",
+                                        "method": "POST", "timestamp": datetime.utcnow()}}
+                err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                return err_resp, 400
+
+        else:
+            err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
+                                    "name": "Lack of token",
+                                    "method": "POST", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+
+class PasswordUserApi(Resource):
+    @token_required
+    def put(self):
+        token = request.headers.get('x-access-tokens')
+        password = request.form.get('password')
+        repeat_password = request.form.get('repeat_password')
+
+        if token is None:
+            err_resp = {"message": {"description": "Lack of token", "status": 401,
+                                    "name": "Can't change password",
+                                    "method": "PUT", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 401
+
+
+        if password != repeat_password:
+            err_resp = {"message": {"description": "Password is not the same as 'repeat_password'", "status": 400,
+                                    "name": "Can't change password ",
+                                    "method": "PUT", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 400
+
+        try:
+            data = jwt.decode(token, current_app.config['SECRET_KEY'])
+        except Exception as e:
+            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
+                                    "method": "PUT", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 401
+
+        password = generate_password_hash(password)
+
+        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, data['email']
+        db.session.execute(cmd)
+        db.session.commit()
+
+        resp = {"message": {"description": "Password has been changed'", "status": 201,
+                                    "name": "Password has been changed",
+                                    "method": "PUT", "timestamp": datetime.utcnow()}}
+        resp = json.dumps(resp, indent=4, sort_keys=True)
+        return resp, 201
+
+
+
+
+
 
 
 

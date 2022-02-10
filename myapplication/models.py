@@ -18,6 +18,8 @@ class Users(db.Model):
     # 1 - is instructor; 0 - not instructor
     is_instructor = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # 0 - not, 1 - confirmed
+    confirmed = db.Column(db.Integer, nullable=False, default=0)
     #confirmed = db.Column(db.Boolean, default=False)
 
     user_participations = db.relationship('Participation', backref='user_participations', lazy=True)
@@ -86,7 +88,7 @@ class Classes(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.String, nullable=False, default=datetime.now().strftime("%Y-%m-%d %H-%M"))
+    date = db.Column(db.String, nullable=False, default=datetime.utcnow().strftime("%Y-%m-%d %H-%M"))
     type_of_classes = db.Column(db.String(100), nullable=False)
 
     #instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
@@ -103,6 +105,39 @@ class Participation(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     class_id = db.Column(db.Integer, db.ForeignKey('fit.classes.id'))
+
+
+class BlackListToken(db.Model):
+    id: int
+    token: str
+
+    __tablename__ = 'BlackListToken'
+    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    token = db.Column(db.String(500), unique=True, nullable=False)
+
+    def __init__(self, token):
+        self.token = token
+
+    def __repr__(self):
+        return '<id: token: {}'.format(self.token)
+
+    @staticmethod
+    def check_blacklist(auth_token):
+        """Static method which purpose is to check whether the token is already in the blacklist. False - doesn't exist,
+            True - exists.
+
+            PARAMETERS:
+                auth_token: str
+            RETURNS:
+                bool"""
+        # check whether auth token has been blacklisted
+        res = BlackListToken.query.filter_by(token=str(auth_token)).first()
+        if res:
+            return False
+        else:
+            return True
 
 
 #db.create_all()

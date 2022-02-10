@@ -1,4 +1,52 @@
+import jwt
 import re
+from functools import wraps
+from flask import request, json, current_app, url_for
+from flask_mail import Message
+from datetime import datetime
+from myapplication import mail
+
+
+def token_required(f):
+	@wraps(f)
+	def decorator(*args, **kwargs):
+		token = None
+
+		if 'x-access-tokens' in request.headers:
+			token = request.headers['x-access-tokens']
+
+		if not token:
+			err_resp = {"message": {"description": "Valid token is missing", "name": "token required", "status": 401,
+									'timestamp': datetime.utcnow()}}
+			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+			return err_resp, 401
+
+		try:
+			data = jwt.decode(token, current_app.config['SECRET_KEY'])
+		except Exception as e:
+			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
+									'timestamp': datetime.utcnow()}}
+			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+			return err_resp, 401
+
+		return f(*args, **kwargs)
+	return decorator
+
+
+def send_email_confirm(email: str):
+	token = current_app.config['SAFE_EMAIL']
+	token = token.dumps(email, salt='email-confirm')
+
+	msg = Message('Confirmation mail from FITNESS CLUB!!', sender="fitness_management@Fitness.com", recipients=[email])
+	link = url_for('confirm_email', token=token, _external=True)
+	msg.body = "Your activation link for Fitness club is {}".format(link)
+
+	try:
+		mail.send(msg)
+		return True, "Confirmation mail has been sent"
+	except Exception as e:
+		return False, e
+
 
 def check_email(email: str) -> bool:
 	regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'

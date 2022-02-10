@@ -1,13 +1,16 @@
+import jwt
 from flask_restful import Resource
-from flask import request, json, jsonify
+from flask import request, json, current_app
 from datetime import datetime
 from myapplication.api.activities.check import check_date_format, check_month_format, check_year_format
+from myapplication.api.auth.auth import token_required
 from myapplication import db
 
 # class involved with classes (classes ~ activity involved with fitness) table
 class ActivityApi(Resource):
+    @token_required
     def get(self, date=None):
-        """Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 then we will receive all acitivites during this day
+        """Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         if we are not passing any date parameter:
             then we will receive all activities from db
         if we are passing date like: 2020_12:
@@ -74,6 +77,21 @@ class ActivityApi(Resource):
         return dictionary, 200
 
 
+class UserActivityApi(Resource):
+    @token_required
+    def get(self):
+        try:
+            token = request.headers.get('x-access-tokens')
+            data = jwt.decode(token, current_app.config['SECRET_KEY'])
+        except Exception as e:
+            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
+                                    "method": "PUT", "timestamp": datetime.utcnow()}}
+            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+            return err_resp, 401
+
+        email = data['email']
+        # TODO: Get every classes in which particular user took part
+        pass
 
 
 

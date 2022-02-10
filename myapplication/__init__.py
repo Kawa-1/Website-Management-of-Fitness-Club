@@ -17,6 +17,7 @@ from myapplication.error_handler.err_handler import error_handler
 log = get_logger(__name__)
 db = SQLAlchemy()
 migrate = Migrate()
+mail = Mail()
 
 
 def create_app():
@@ -24,14 +25,16 @@ def create_app():
     #log.info("Starting server...")
     app = Flask(__name__)
     api = Api(app)
-    mail = Mail(app)
 
     app.config.from_mapping(SECRET_KEY='dev')
 
     crypt_ob = CryptoKey()
     app.config['CRYPTO_KEY'] = crypt_ob
 
+    mail.init_app(app)
     app.config['SAFE_EMAIL'] = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    app.config['MAIL_APP'] = mail
+    print(app.config['SAFE_EMAIL'])
 
     load_conf_db(app, crypt_ob)
     load_conf_mail(app, crypt_ob)
@@ -45,6 +48,12 @@ def create_app():
 
     from myapplication.api.auth.api import RegisterUserApi
     api.add_resource(RegisterUserApi, '/api/register')
+
+    from myapplication.api.auth.api import ConfirmEmail
+    api.add_resource(ConfirmEmail, "/api/confirm_email/<string:token>")
+
+    from myapplication.api.auth.api import SendEmailConfirmationApi
+    api.add_resource(SendEmailConfirmationApi, "/api/send_confirmation_mail")
 
     from myapplication.api.activities.classes import ActivityApi
     api.add_resource(ActivityApi, "/api/activity/<string:date>")
@@ -66,16 +75,16 @@ def create_app():
 
 
 def load_conf_mail(app: Mail, crypt_ob) -> None:
-    conf_db = YamlConf.get_yaml_postgres("config_mail.yaml")
+    conf_db = YamlConf.get_yaml_mail()
     app.config['MAIL_SERVER'] = conf_db['mail_server']
     app.config['MAIL_USERNAME'] = conf_db['mail_username']
-    app.config['MAIL_PASSWORD'] = crypt_ob.get_decryption_string(bytes(conf_db['password'], 'utf-8'))
+    app.config['MAIL_PASSWORD'] = crypt_ob.get_decryption_string(bytes(conf_db['mail_password'], 'utf-8'))
     app.config['MAIL_PORT'] = conf_db['mail_port']
     app.config['MAIL_USE_SSL'] = conf_db['mail_use_ssl']
     app.config['MAIL_USE_TLS'] = conf_db['mail_use_tls']
 
 def load_conf_db(app: Flask, crypt_ob: CryptoKey) -> None:
-    conf_db = YamlConf.get_yaml_postgres("config_pg.yaml")
+    conf_db = YamlConf.get_yaml_postgres()
     app.config['DB_DRIVER'] = conf_db['driver']
     app.config['DB_HOST'] = conf_db['host']
     app.config['DB_NAME'] = conf_db['dbname']
