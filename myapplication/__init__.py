@@ -60,7 +60,9 @@ def create_app():
 
     @app.route('/', methods=['GET'])
     def hello():
-        r = db.engine.execute('SELECT * FROM users;')
+        #r = db.engine.execute('SELECT * FROM users;')
+        data = request.get_json(silent=True)
+        print(data.get('id'))
         return "<h1>HELLOOOOOO!!!</h1>"
 
     @app.route('/hello', methods=['GET'])

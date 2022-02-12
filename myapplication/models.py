@@ -139,5 +139,11 @@ class BlackListToken(db.Model):
         else:
             return True
 
+class Test(db.Model):
+    __tablename__ = 'participation'
+    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(500), nullable=False)
+    email = db.Column(db.String(500), unique=True, nullable=False)
 #db.create_all()
