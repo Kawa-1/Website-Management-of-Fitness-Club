@@ -139,8 +139,7 @@ class UserActivityApi(Resource):
         if not body or class_id is None:
             err_resp = {"message": {"description": "lack of information to which activity user want to be signed",
                                     "status": 400, "name": "lack of body; json", "method": "POST", "timestamp":
-                                    datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                                    str(datetime.utcnow())}}
             return err_resp, 400
 
         cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=\'%d\'" % class_id
@@ -149,15 +148,13 @@ class UserActivityApi(Resource):
         if number_of_users is None:
             err_resp = {"message": {
                 "description": "Such activity doesn't exist",
-                "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         number_of_users = number_of_users[0]
         if number_of_users >= 15:
             err_resp = {"message": {"description": "User is not allowed to join this activity bcs number of users is max, it means 15",
-                                    "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                                    "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         cmd = "SELECT user_id FROM fit.participation WHERE user_id=\'%s\' AND class_id=\'%s\'" %  (current_user.id, class_id)
@@ -165,8 +162,7 @@ class UserActivityApi(Resource):
         if res is not None:
             err_resp = {"message": {
                 "description": "User is already signed for this activity",
-                "status": 400, "name": "Already signed up", "method": "POST", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                "status": 400, "name": "Already signed up", "method": "POST", "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
 
@@ -174,8 +170,7 @@ class UserActivityApi(Resource):
         db.session.commit()
 
         resp = {"message": {"description": "User properly signed up for activity with email: {} and class_id: {}".format(current_user.email, class_id),
-                                    "status": 201, "name": "signed up for activity", "method": "POST", "timestamp": datetime.utcnow()}}
-        resp = json.dumps(resp, indent=4, sort_keys=True)
+                                    "status": 201, "name": "signed up for activity", "method": "POST", "timestamp": str(datetime.utcnow())}}
         return resp, 201
 
     @token_required
@@ -186,8 +181,7 @@ class UserActivityApi(Resource):
         if class_id is None or res is None:
             err_resp = {"message": {
                 "description": "Such activity doesn't exist, cannot be deleted",
-                "status": 400, "name": "cannot delete", "method": "DELETE", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                "status": 400, "name": "cannot delete", "method": "DELETE", "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         cmd = "DELETE FROM fit.participation WHERE user_id=%d AND class_id=%d" % current_user.id, class_id
@@ -196,8 +190,7 @@ class UserActivityApi(Resource):
 
         resp = {"message": {
             "description": "User properly signed off the activity user's email: {} and class_id: {}".format(current_user.email, class_id),
-            "status": 202, "name": "User deleted from activity", "method": "POST", "timestamp": datetime.utcnow()}}
-        resp = json.dumps(resp, indent=4, sort_keys=True)
+            "status": 202, "name": "User deleted from activity", "method": "POST", "timestamp": str(datetime.utcnow())}}
         return resp, 202
 
 
