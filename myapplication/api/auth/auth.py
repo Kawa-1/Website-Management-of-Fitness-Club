@@ -5,6 +5,7 @@ from flask import request, json, current_app, url_for
 from flask_mail import Message
 from datetime import datetime
 from myapplication import mail
+from myapplication.models import Users
 
 
 def token_required(f):
@@ -23,13 +24,14 @@ def token_required(f):
 
 		try:
 			data = jwt.decode(token, current_app.config['SECRET_KEY'])
+			current_user = Users.query.filter_by(id=data['id']).first()
 		except Exception as e:
 			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
 									'timestamp': datetime.utcnow()}}
 			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 			return err_resp, 401
 
-		return f(*args, **kwargs)
+		return f(current_user, *args, **kwargs)
 	return decorator
 
 
@@ -38,14 +40,18 @@ def send_email_confirm(email: str):
 	token = token.dumps(email, salt='email-confirm')
 
 	msg = Message('Confirmation mail from FITNESS CLUB!!', sender="fitness_management@Fitness.com", recipients=[email])
-	link = url_for('confirm_email', token=token, _external=True)
-	msg.body = "Your activation link for Fitness club is {}".format(link)
-
+	#link = url_for("/api/confirm_email", token=token, _external=True)
+	link = "http://127.0.0.1:5000/api/confirm_email/{}".format(token)
+	msg.body = """Your activation link for Fitness club is
+				{}
+				PLease ignore this email if it is not you!
+				""".format(link)
 	try:
 		mail.send(msg)
 		return True, "Confirmation mail has been sent"
 	except Exception as e:
-		return False, e
+		print(e)
+		return False, str(e)
 
 
 def check_email(email: str) -> bool:

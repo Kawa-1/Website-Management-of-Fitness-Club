@@ -9,8 +9,9 @@ from myapplication.models import Participation
 
 # class involved with classes (classes ~ activity involved with fitness) table
 class ActivityApi(Resource):
-    @token_required
-    def get(self, date=None):
+    #@token_required
+    #current_user = None
+    def get(self, date=None, limit=5):
         """Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         if we are not passing any date parameter:
             then we will receive all activities from db
@@ -23,26 +24,40 @@ class ActivityApi(Resource):
         """
         date: str
 
+        limit_ = request.args.get("limit")
+
+        if limit_ is not None:
+            try:
+                limit = int(limit_)
+            except Exception as e:
+                err_resp = {"message": {
+                    "description": "Argument limit must be int",
+                    "status": 400, "name": "invalid format of parameter limit", "method": "GET", "timestamp": datetime.utcnow()}}
+                err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                return err_resp, 400
+
         if date is None:
-            cmd = "SELECT * FROM fit.classes"
+            cmd = """SELECT c.date, c.type_of_classes, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
+                    FROM fit.classes c
+                    INNER JOIN fit.facilities f ON c.facility_id=f.id
+                    INNER JOIN fit.price_list p ON c.price_id=p.id
+                    INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=c.instructor_id
+                    ORDER BY c.date DESC 
+                    LIMIT %d""" % limit
             activity = db.session.execute(cmd).cursor.fetchall()
             if len(activity) == 0:
                 return ("", 204)
 
             dictionary = {"activities": []}
             for obj in activity:
-                cmd = "SELECT f.city, f.street, f.house_number, (SELECT p.price FROM fit.price_list p WHERE p.id=\'%s\') \
-                                FROM fit.facilities f WHERE f.id=\'%s\'" % (obj[5], obj[4])
-                foreign = db.session.execute(cmd).cursor.fetchone()
                 dictionary['activities'].append(
-                    {"id": obj[0], 'date': obj[1], 'type_of_classes': obj[2], 'instructor_id': obj[3],
-                     'facility_id': obj[4], 'city': foreign[0], 'street': foreign[1],
-                     'house_number': foreign[2], 'price': foreign[3]})
+                    {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
+                     'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
+                     'last_name': obj[7], 'email': obj[8]})
 
-            dictionary['activities'] = sorted(dictionary['activities'], key=lambda i: i['date'], reverse=False)
+            #dictionary['activities'] = sorted(dictionary['activities'], key=lambda i: i['date'], reverse=False)
             dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
             return dictionary, 200
-
 
         err_resp = {"errors": [{"description": "Provided bad format of date",
                                 "method": "GET", "name": "Failed obtaining classes", "status": 400, "timestamp": datetime.now()}]}
@@ -52,7 +67,14 @@ class ActivityApi(Resource):
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
             return err_resp, 400
 
-        cmd = "SELECT * FROM fit.classes WHERE classes.date~*'^%s.*'" % date
+        cmd = """SELECT c.date, c.type_of_classes, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
+              FROM fit.classes c 
+              INNER JOIN fit.facilities f ON c.facility_id=f.id
+              INNER JOIN fit.price_list p ON c.price_id=p.id
+              INNER JOIN fit.users u ON u.instructor.id=1 AND u.id=c.instructor_id
+              WHERE c.date~*\'^%s.*\'
+              ORDER BY c.date DESC
+              LIMIT %d """  % date, limit
         activity = db.session.execute(cmd).cursor.fetchall()
         print(activity)
         print(len(activity))
@@ -64,34 +86,22 @@ class ActivityApi(Resource):
             return ("", 204)
 
         dictionary = {"activities": []}
-
-        # TODO: NEED TO CHANGE IT!!!
         for obj in activity:
-            cmd = "SELECT f.city, f.street, f.house_number, (SELECT p.price FROM fit.price_list p WHERE p.id=\'%s\') \
-                            FROM fit.facilities f WHERE f.id=\'%s\'" % (obj[5], obj[4])
-            foreign = db.session.execute(cmd).cursor.fetchone()
-            dictionary['activities'].append({"id": obj[0], 'date': obj[1], 'type_of_classes': obj[2], 'instructor_id': obj[3],
-                                             'facility_id': obj[4], 'city': foreign[0], 'street': foreign[1],
-                                             'house_number': foreign[2], 'price': foreign[3]})
+            for obj in activity:
+                dictionary['activities'].append(
+                    {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
+                     'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
+                     'last_name': obj[7], 'email': obj[8]})
 
-        dictionary['activities'] = sorted(dictionary['activities'], key = lambda i: i['date'], reverse=False)
+        #dictionary['activities'] = sorted(dictionary['activities'], key = lambda i: i['date'], reverse=False)
         dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
         return dictionary, 200
 
 
 class UserActivityApi(Resource):
     @token_required
-    def get(self):
-        try:
-            token = request.headers.get('x-access-tokens')
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
-        except Exception as e:
-            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
-                                    "method": "GET", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
-            return err_resp, 401
-
-        user_id = data['id']
+    def get(self, current_user=None):
+        user_id = current_user.id
         # TODO: Get every classes in which particular user took part; DESC - 1st row will be the newest
         cmd =  """SELECT c.type_of_classes, c.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
         (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=c.id GROUP BY c.id), c.id, pr.price, pr.service 
@@ -119,19 +129,10 @@ class UserActivityApi(Resource):
         return dictionary, 200
 
     @token_required
-    def post(self):
-        """Signing up for classes
+    def post(self, current_user=None):
+        """Signing up for classes. ID indicates id of activity
             DESIRED BODY: e.g. {"id": 1}
         """
-        try:
-            token = request.headers.get('x-access-tokens')
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
-        except Exception as e:
-            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
-                                    "method": "GET", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
-            return err_resp, 401
-
         body = request.get_json(silent=True)
         class_id = body.get('id')
 
@@ -159,7 +160,7 @@ class UserActivityApi(Resource):
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
-        cmd = "SELECT user_id FROM fit.participation WHERE user_id=\'%s\' AND class_id=\'%s\'" %  (data['id'], class_id)
+        cmd = "SELECT user_id FROM fit.participation WHERE user_id=\'%s\' AND class_id=\'%s\'" %  (current_user.id, class_id)
         res = db.session.execute(cmd).cursor.fetchone()
         if res is not None:
             err_resp = {"message": {
@@ -169,26 +170,17 @@ class UserActivityApi(Resource):
             return err_resp, 400
 
 
-        db.session.add(Participation(user_id=data['id'], class_id=class_id))
+        db.session.add(Participation(user_id=current_user.id, class_id=class_id))
         db.session.commit()
 
-        resp = {"message": {"description": "User properly signed up for activity with user_id: {} and class_id: {}".format(data['id'], class_id),
+        resp = {"message": {"description": "User properly signed up for activity with email: {} and class_id: {}".format(current_user.email, class_id),
                                     "status": 201, "name": "signed up for activity", "method": "POST", "timestamp": datetime.utcnow()}}
         resp = json.dumps(resp, indent=4, sort_keys=True)
         return resp, 201
 
     @token_required
-    def delete(self, class_id=None):
-        try:
-            token = request.headers.get('x-access-tokens')
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
-        except Exception as e:
-            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
-                                    "method": "GET", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
-            return err_resp, 401
-
-        cmd = "SELECT id FROM fit.classes WHERE id=\'%d\'" % class_id
+    def delete(self, current_user=None, class_id=None):
+        cmd = "SELECT id FROM fit.classes WHERE id=%d" % class_id
         res = db.session.execute(cmd).cursor.fetchone()
 
         if class_id is None or res is None:
@@ -198,23 +190,17 @@ class UserActivityApi(Resource):
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
-        cmd = "DELETE FROM fit.participation WHERE user_id=\'%s\' AND class_id=\'%s\'"
+        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND class_id=%d" % current_user.id, class_id
         db.session.execute(cmd)
         db.session.commit()
 
         resp = {"message": {
-            "description": "User properly signed off the activity user_id: {} and class_id: {}".format(data['id'], class_id),
+            "description": "User properly signed off the activity user's email: {} and class_id: {}".format(current_user.email, class_id),
             "status": 202, "name": "User deleted from activity", "method": "POST", "timestamp": datetime.utcnow()}}
         resp = json.dumps(resp, indent=4, sort_keys=True)
         return resp, 202
 
 
-
-
-
-
-
-        #cmd = "SELECT COUNT(p.user_id)
 
 
 

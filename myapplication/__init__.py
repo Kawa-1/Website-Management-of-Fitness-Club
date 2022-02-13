@@ -53,16 +53,34 @@ def create_app():
     api.add_resource(ConfirmEmail, "/api/confirm_email/<string:token>")
 
     from myapplication.api.auth.api import SendEmailConfirmationApi
-    api.add_resource(SendEmailConfirmationApi, "/api/send_confirmation_mail")
+    api.add_resource(SendEmailConfirmationApi, "/api/send_confirmation_email")
+
+    from myapplication.api.auth.api import LoginUserApi
+    api.add_resource(LoginUserApi, "/api/login")
+
+    from myapplication.api.auth.api import LogoutUserApi
+    api.add_resource(LogoutUserApi, "/api/logout")
+
+    from myapplication.api.auth.api import PasswordUserApi
+    api.add_resource(PasswordUserApi, "/api/change_password")
+
+    from myapplication.api.activities.classes import UserActivityApi
+    api.add_resource(UserActivityApi, "/api/user_activity/<int:class_id>", "/api/user_activity")
 
     from myapplication.api.activities.classes import ActivityApi
-    api.add_resource(ActivityApi, "/api/activity/<string:date>")
+    api.add_resource(ActivityApi, "/api/activity_api/<string:date>", "/api/activity_api")
+
+    from myapplication.api.auth.api import Test
+    api.add_resource(Test, "/test")
 
     @app.route('/', methods=['GET'])
     def hello():
+        arguments = request.args.get("username")
+        print(type(arguments))
         #r = db.engine.execute('SELECT * FROM users;')
         data = request.get_json(silent=True)
-        print(data.get('id'))
+        print(data)
+        #print(data.get('id'))
         return "<h1>HELLOOOOOO!!!</h1>"
 
     @app.route('/hello', methods=['GET'])

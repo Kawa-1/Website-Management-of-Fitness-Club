@@ -10,6 +10,13 @@ from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
 
 
+class Test(Resource):
+    def get(self):
+        send_email_confirm("Papercut@user.com")
+
+    def post(self):
+        return "HEJ"
+
 class RegisterUserApi(Resource):
     def post(self):
         err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
@@ -96,6 +103,8 @@ class RegisterUserApi(Resource):
 class SendEmailConfirmationApi(Resource):
     def post(self):
         email = request.headers.get('email')
+        email = clean(email)
+        print(email)
         if email is None or not check_email(email):
             err_resp = {"message": {"description": "Bad format of email", "confirmation_email": "Has not been sent", "status": 400,
                                         "name": "email confirmation; error", "method": "POST", "timestamp": datetime.utcnow()}}
@@ -121,17 +130,26 @@ class ConfirmEmail(Resource):
         try:
             email = current_app.config['SAFE_EMAIL']
             email = email.loads(token, salt='email-confirm', max_age=3600)
-            cmd = 'UPDATE fit.users SET users.confirmed=1 WHERE users.email=\'%s\'' % email
+            cmd = "SELECT id FROM fit.users where email=\'%s\'" % email
+            user = db.session.execute(cmd).cursor.fetchone()
+            if user is None:
+                err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
+                                         "name": "This account doesn't exist", "method": "GET", "timestamp": datetime.utcnow()}]}
+                err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
+                return err_resp, 400
+
+            cmd = "UPDATE fit.users SET confirmed=1 WHERE email=\'%s\'" % email
             db.session.execute(cmd)
             db.session.commit()
-            resp = {"message": {"description": "Account has been confirmed", "status": 200, "email": email,
+            resp = {"message": {"description": "Account has been confirmed", "status": 200, "email": str(email),
                                      "name": "confirm_email", "method": "GET", "timestamp": datetime.utcnow()}}
             resp = json.dumps(resp, indent=4, sort_keys=True)
             return resp, 200
 
         except Exception as e:
+            # In prod we should change printing straight error...
             err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
-                                     "name": e, "method": "GET", "timestamp": datetime.utcnow()}]}
+                                     "name": str(e), "method": "GET", "timestamp": datetime.utcnow()}]}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
@@ -147,7 +165,7 @@ class LoginUserApi(Resource):
         user = Users.query.filter_by(email=email).first()
 
         if not user or not check_password_hash(user.password, password):
-            err_resp = {"message": {"description": "Such user doesn't exist, password is incorrect",
+            err_resp = {"message": {"description": "Such user doesn't exist or password is incorrect",
                                     "name": "Could not log into", "method": "POST", "status": 400, "timestamp": datetime.utcnow()}}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
@@ -163,30 +181,25 @@ class LoginUserApi(Resource):
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
-                            "timestamp": datetime.utcnow()}}
+                            "timestamp": datetime.utcnow()},
+                "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name, "is_instructor": user.is_instructor
+                         }}
         resp = json.dumps(resp, indent=4, sort_keys=True)
         return resp, 201
 
 
 class LogoutUserApi(Resource):
     @token_required
-    def post(self):
-        post_data = request.get_json()
-        auth_token = post_data.get('x-access-tokens')
-        email_current_user = post_data.get('email')
-        try:
-            data = jwt.decode(auth_token, current_app.config['SECRET_KEY'])
-        except Exception as e:
-            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
-                                    "method": "POST", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
-            return err_resp, 401
+    def post(self, current_user=None):
+        auth_token = request.headers['x-access-tokens']
 
-        if email_current_user is None or data['email'] != email_current_user:
-            err_resp = {"message": {"description": "This token doesn't belong to this user", "status": 403, "name": "Failed blacklisting of token",
+        if current_user is None:
+            err_resp = {"message": {"description": "This token is invalid", "status": 403, "name": "Failed blacklisting of token",
                                     "method": "POST", "timestamp": datetime.utcnow()}}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 403
+
+        email_current_user = current_user.email
 
         if auth_token:
             if BlackListToken.check_blacklist(auth_token):
@@ -224,7 +237,7 @@ class LogoutUserApi(Resource):
 
 class PasswordUserApi(Resource):
     @token_required
-    def put(self):
+    def put(self, current_user=None):
         token = request.headers.get('x-access-tokens')
         password = request.form.get('password')
         repeat_password = request.form.get('repeat_password')
@@ -236,7 +249,6 @@ class PasswordUserApi(Resource):
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 401
 
-
         if password != repeat_password:
             err_resp = {"message": {"description": "Password is not the same as 'repeat_password'", "status": 400,
                                     "name": "Can't change password ",
@@ -244,17 +256,9 @@ class PasswordUserApi(Resource):
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
-        try:
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
-        except Exception as e:
-            err_resp = {"message": {"description": "token is invalid", "status": 401, "name": e,
-                                    "method": "PUT", "timestamp": datetime.utcnow()}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
-            return err_resp, 401
-
         password = generate_password_hash(password)
 
-        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, data['email']
+        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, current_user.email
         db.session.execute(cmd)
         db.session.commit()
 
