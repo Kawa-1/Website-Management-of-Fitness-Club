@@ -2,3 +2,4 @@ Flask==2.0.0
 itsdangerous==2.0.1
 PyYAML==6.0
 cryptography==36.0.1
+Flask-Mail==0.9.1
