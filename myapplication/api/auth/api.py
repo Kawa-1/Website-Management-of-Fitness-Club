@@ -168,7 +168,7 @@ class LoginUserApi(Resource):
 
 
         token = jwt.encode({"id": user.id, "email": user.email, "first_name": user.first_name, "last_name": user.last_name,
-                            "exp": str(datetime.utcnow())() + timedelta(days=1)}, key, algorithm="HS256")
+                            "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
                             "timestamp": str(datetime.utcnow())()},
