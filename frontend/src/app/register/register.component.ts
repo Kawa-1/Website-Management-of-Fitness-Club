@@ -1,6 +1,6 @@
 import { ToastrService } from 'ngx-toastr';
 import { Component, OnInit } from '@angular/core';
-// import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -11,7 +11,7 @@ import { Component, OnInit } from '@angular/core';
 export class RegisterComponent implements OnInit{ 
   constructor( 
     private toastr: ToastrService, 
-    // private auth: AuthService 
+    private auth: AuthService 
   ) {}
  
   isDisabled = true;
@@ -19,26 +19,24 @@ export class RegisterComponent implements OnInit{
 
   ngOnInit(){}
 
-  clicked(email:string, firstName:string, lastName:string, username:string, password:string, repeatPassword: string){
+  clicked(email:string, firstName:string, lastName:string, city:string, password:string, repeatPassword: string){
     var formData: any = new FormData();
 
     formData.append("email", email);
     formData.append("firstName", firstName);
     formData.append("lastName", lastName);
-    formData.append("username", username);
     formData.append("password", password);
     formData.append("repeatPassword", repeatPassword);
 
-    // this.auth.register(formData)
-    // .subscribe(
-    //   data => {
-    //       this.toastr.success('Registered successfully');
-    //   });
+    this.auth.register(formData)
+    .subscribe(
+      data => {
+          this.toastr.success('Registered successfully');
+      });
 
     formData.delete("email");
     formData.delete("firstName");
     formData.delete("lastName");
-    formData.delete("username");
     formData.delete("password");
     formData.delete("repeatPassword");
   }
