@@ -166,11 +166,16 @@ class ConfirmEmail(Resource):
 
 class LoginUserApi(Resource):
     def post(self):
-        post_data = request.get_json()
+        # post_data = request.get_json()
+        # key = current_app.config['SECRET_KEY']
+
+        # email = post_data.get('email')
+        # password = post_data.get('password')
+
         key = current_app.config['SECRET_KEY']
 
-        email = post_data.get('email')
-        password = post_data.get('password')
+        email = request.form.get('email')
+        password = request.form.get('password')
 
         user = Users.query.filter_by(email=email).first()
 

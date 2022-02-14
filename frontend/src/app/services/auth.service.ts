@@ -17,15 +17,15 @@ export class AuthService {
     private http: HttpClient
   ){}
 
-  login(user: User): Promise<any> {
-    let url: string = this.path + "/login";
-    return this.http.post(url, user, {headers: this.headers}).toPromise();
-  }
-
-  // login(user: User) {
+  // login(user: User): Promise<any> {
   //   let url: string = this.path + "/login";
-  //   return this.http.post(url, user, {headers: this.headers});
+  //   return this.http.post(url, user, {headers: this.headers}).toPromise();
   // }
+
+  login(user: User) {
+    let url: string = this.path + "/login";
+    return this.http.post(url, user);
+  }
 
   ensureAuthenticated(token:any): Promise<any> {
     let url: string = this.path + "/status";
