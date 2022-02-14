@@ -190,7 +190,7 @@ class LoginUserApi(Resource):
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
-                            "timestamp": str(datetime.utcnow())()},
+                            "timestamp": str(datetime.utcnow())},
                 "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name, "is_instructor": user.is_instructor
                          }}
         resp = jsonify(resp)
