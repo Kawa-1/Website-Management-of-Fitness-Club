@@ -7,6 +7,7 @@ from datetime import datetime
 from myapplication import mail
 from myapplication.models import Users
 
+timestamp = str(datetime.utcnow())
 
 def token_required(f):
 	@wraps(f)
@@ -18,7 +19,7 @@ def token_required(f):
 
 		if not token:
 			err_resp = {"message": {"description": "Valid token is missing", "name": "token required", "status": 401,
-									'timestamp': datetime.utcnow()}}
+									'timestamp': timestamp}}
 			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 			return err_resp, 401
 
@@ -27,7 +28,7 @@ def token_required(f):
 			current_user = Users.query.filter_by(id=data['id']).first()
 		except Exception as e:
 			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
-									'timestamp': datetime.utcnow()}}
+									'timestamp': timestamp}}
 			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 			return err_resp, 401
 

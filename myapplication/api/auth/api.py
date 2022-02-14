@@ -9,6 +9,7 @@ from myapplication import db
 from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
 
+timestamp = str(datetime.utcnow())
 
 class Test(Resource):
     @token_required
@@ -42,44 +43,44 @@ class RegisterUserApi(Resource):
             not password or not repeat_password:
             err_resp = {"errors": {"description": "One of the fields has not been provided",
                                    "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
+                                   "timestamp": timestamp}}
             return err_resp, 400
 
         if check_email(email) is False:
             err_resp = {"errors": {"description": "Format of email is incorrect",
                                     "method": "POST", "name": "Failed registration", "status": 400,
-                                    "timestamp": str(datetime.utcnow())}}
+                                    "timestamp": timestamp}}
             return err_resp, 400
 
         if user:
             err_resp = {"message": {"description": "Such user already exists",
                                     "method": "POST", "name": "Failed registration", "status": 400,
-                                    "timestamp": str(datetime.utcnow())}}
+                                    "timestamp": timestamp}}
             return err_resp, 400
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
             err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
                                    "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
+                                   "timestamp": timestamp}}
             return err_resp, 400
 
         if check_postcode(postcode) is False:
             err_resp = {"errors": {"description": "Check postcode failed",
                         "method": "POST", "name": "Failed registration", "status": 400,
-                        "timestamp": str(datetime.utcnow())}}
+                        "timestamp": timestamp}}
             return err_resp, 400
 
         if password != repeat_password:
             err_resp = {"errors": {"description": "Passwords are not correct",
                                    "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
+                                   "timestamp": timestamp}}
             return err_resp, 400
 
         if check_number(house_number) is False:
             err_resp = {"errors": {"description": "Check house number failed",
                                    "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
+                                   "timestamp": timestamp}}
             return err_resp, 400
 
         first_name = clean(first_name)
@@ -100,14 +101,14 @@ class RegisterUserApi(Resource):
         if send[0] is False:
             err_resp = {"message": {"description": "Confrimation email could not be send", "error": "Mail was not sent",
                          "method": "POST", "name": send[1], "status": 500,
-                         "timestamp": str(datetime.utcnow())}}
+                         "timestamp": timestamp}}
             return err_resp, 500
 
         db.session.add(new_user)
         db.session.commit()
 
         created_resp = {"message": {"description": "new user created", "confirmation_email": send[1], "status": 201,
-                                     "name": "registration", "method": "POST", "timestamp": str(datetime.utcnow())}, "user":
+                                     "name": "registration", "method": "POST", "timestamp": timestamp}, "user":
             {"first_name": first_name, "last_name": last_name, "confirmed": False}}
         created_resp = json.dumps(created_resp, indent=4, sort_keys=True)
         return created_resp, 201
@@ -120,17 +121,17 @@ class SendEmailConfirmationApi(Resource):
         print(email)
         if email is None or not check_email(email):
             err_resp = {"message": {"description": "Bad format of email", "confirmation_email": "Has not been sent", "status": 400,
-                                        "name": "email confirmation; error", "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                        "name": "email confirmation; error", "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
         send = send_email_confirm(email)
         if send[0] is False:
             err_resp = {"message": {"description": "Mail has not been sent", "confirmation_email": "Has not been sent",
-                                    "status": 400, "name": send[1], "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                    "status": 400, "name": send[1], "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
         resp = {"message": {"description": "Confirmation mail has been sent", "confirmation_email": send[1], "status": 200,
-                                     "name": "confirmation of account", "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                     "name": "confirmation of account", "method": "POST", "timestamp": timestamp}}
         return resp, 200
 
 
@@ -144,21 +145,21 @@ class ConfirmEmail(Resource):
             user = db.session.execute(cmd).cursor.fetchone()
             if user is None:
                 err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
-                                         "name": "This account doesn't exist", "method": "GET", "timestamp": str(datetime.utcnow())}]}
+                                         "name": "This account doesn't exist", "method": "GET", "timestamp": timestamp}]}
                 return err_resp, 400
 
             cmd = "UPDATE fit.users SET confirmed=1 WHERE email=\'%s\'" % email
             db.session.execute(cmd)
             db.session.commit()
             resp = {"message": {"description": "Account has been confirmed", "status": 200, "email": str(email),
-                                     "name": "confirm_email", "method": "GET", "timestamp": str(datetime.utcnow())}}
+                                     "name": "confirm_email", "method": "GET", "timestamp": timestamp}}
             resp = json.dumps(resp, indent=4, sort_keys=True)
             return resp, 200
 
         except Exception as e:
             # In prod we should change printing straight error...
             err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
-                                     "name": str(e), "method": "GET", "timestamp": str(datetime.utcnow())}]}
+                                     "name": str(e), "method": "GET", "timestamp": timestamp}]}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
@@ -175,13 +176,13 @@ class LoginUserApi(Resource):
 
         if not user or not check_password_hash(user.password, password):
             err_resp = {"message": {"description": "Such user doesn't exist or password is incorrect",
-                                    "name": "Could not log into", "method": "POST", "status": 400, "timestamp": str(datetime.utcnow())}}
+                                    "name": "Could not log into", "method": "POST", "status": 400, "timestamp": timestamp}}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
         if user.confirmed == 0:
             err_resp = {"message": {"description": "This account has not been confirmed yet",
-                                    "name": "Could not log into", "method": "POST", "status": 400}, "timestamp": str(datetime.utcnow())}
+                                    "name": "Could not log into", "method": "POST", "status": 400}, "timestamp": timestamp}
             err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
@@ -190,12 +191,13 @@ class LoginUserApi(Resource):
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
-                            "timestamp": str(datetime.utcnow())},
+                            "timestamp": timestamp},
                 "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name, "is_instructor": user.is_instructor
                          }}
         resp = jsonify(resp)
         resp.status_code = 201
-        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        print(resp)
         return resp
 
 
@@ -206,7 +208,7 @@ class LogoutUserApi(Resource):
 
         if current_user is None:
             err_resp = {"message": {"description": "This token is invalid", "status": 403, "name": "Failed blacklisting of token",
-                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                    "method": "POST", "timestamp": timestamp}}
             return err_resp, 403
 
         email_current_user = current_user.email
@@ -218,26 +220,26 @@ class LogoutUserApi(Resource):
 
                     db.session.add(blacklist_token)
                     db.session.commit()
-                    resp = {"message": {"description": "User has been logged out", "status": 200, "name": "Token is blacklisted",
-                                        "method": "POST", "timestamp": str(datetime.utcnow())}}
+                    resp = {"message": {"description": "User has logged out", "status": 200, "name": "Token is blacklisted",
+                                        "method": "POST", "timestamp": timestamp}}
                     return resp, 200
 
                 else:
                     err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
                                         "name": "Token is invalid",
-                                        "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                        "method": "POST", "timestamp": timestamp}}
                     return err_resp, 400
 
             else:
                 err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
                                         "name": "Token is already in blacklist",
-                                        "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                        "method": "POST", "timestamp": timestamp}}
                 return err_resp, 400
 
         else:
             err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
                                     "name": "Lack of token",
-                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                    "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
 
@@ -251,13 +253,13 @@ class PasswordUserApi(Resource):
         if token is None:
             err_resp = {"message": {"description": "Lack of token", "status": 401,
                                     "name": "Can't change password",
-                                    "method": "PUT", "timestamp": str(datetime.utcnow())}}
+                                    "method": "PUT", "timestamp": timestamp}}
             return err_resp, 401
 
         if password != repeat_password:
             err_resp = {"message": {"description": "Password is not the same as 'repeat_password'", "status": 400,
                                     "name": "Can't change password ",
-                                    "method": "PUT", "timestamp": str(datetime.utcnow())}}
+                                    "method": "PUT", "timestamp": timestamp}}
             return err_resp, 400
 
         password = generate_password_hash(password)
@@ -268,7 +270,7 @@ class PasswordUserApi(Resource):
 
         resp = {"message": {"description": "Password has been changed'", "status": 201,
                                     "name": "Password has been changed",
-                                    "method": "PUT", "timestamp": str(datetime.utcnow())}}
+                                    "method": "PUT", "timestamp": timestamp}}
         return resp, 201
 
 
@@ -279,7 +281,7 @@ class refresh_token(Resource):
         if current_user is None:
             err_resp = {"message": {"description": "Lack of user", "status": 400,
                                     "name": "Can't refresh token",
-                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                    "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
         token = request.headers.get("x-access-token")
@@ -287,7 +289,7 @@ class refresh_token(Resource):
         if token is None:
             err_resp = {"message": {"description": "Lack of user", "status": 400,
                                     "name": "Can't refresh token",
-                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                    "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
         ep = datetime(1970, 1, 1, 0, 0, 0)
@@ -298,12 +300,12 @@ class refresh_token(Resource):
         if time_to_expire > 7200:
             err_resp = {"message": {"description": "Only tokens with expire time < 2h can be refreshed", "status": 201,
                                 "name": "Token has not been refreshed",
-                                "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
         err_resp = {"message": {"description": "Token can't be blacklisted", "status": 200,
                                 "name": "Token is invalid",
-                                "method": "POST", "timestamp": str(datetime.utcnow())}}
+                                "method": "POST", "timestamp": timestamp}}
 
         if token:
             if BlackListToken.check_blacklist(token):
@@ -326,7 +328,7 @@ class refresh_token(Resource):
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Old Token has been blacklisted and new one is generated", "status": 200, "name": "Old Token is blacklisted; new one generated",
-                            "method": "POST","token": new_token ,"timestamp": str(datetime.utcnow())}}
+                            "method": "POST","token": new_token ,"timestamp": timestamp}}
 
         return resp, 201
 
