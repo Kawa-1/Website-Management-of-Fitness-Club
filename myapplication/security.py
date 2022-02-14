@@ -33,6 +33,7 @@ class CryptoKey(metaclass=Singleton):
         string = self.crypto.decrypt(bytes_).decode('utf-8')
         return string
 
+
 #ob = CryptoKey()
 #print(ob.get_encryption('postgres'))
 
