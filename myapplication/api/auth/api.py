@@ -195,7 +195,7 @@ class LoginUserApi(Resource):
                          }}
         resp = jsonify(resp)
         resp.status_code = 201
-        resp.headers["Access-Control-Allow-Origin"] = "http://localhost:4200"
+        resp.headers["Access-Control-Allow-Origin"] = "*"
         return resp
 
 
