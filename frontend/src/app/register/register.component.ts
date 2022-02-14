@@ -19,14 +19,18 @@ export class RegisterComponent implements OnInit{
 
   ngOnInit(){}
 
-  clicked(email:string, firstName:string, lastName:string, city:string, password:string, repeatPassword: string){
+  clicked(email:string, firstName:string, lastName:string, city:string, street:string, house_nr:string, postcode:string, password:string, repeatPassword: string){
     var formData: any = new FormData();
 
     formData.append("email", email);
-    formData.append("firstName", firstName);
-    formData.append("lastName", lastName);
+    formData.append("first_name", firstName);
+    formData.append("last_name", lastName);
+    formData.append("city", city);
+    formData.append("street", street);
+    formData.append("house_number", house_nr);
+    formData.append("postcode", postcode);
     formData.append("password", password);
-    formData.append("repeatPassword", repeatPassword);
+    formData.append("repeat_password", repeatPassword);
 
     this.auth.register(formData)
     .subscribe(
@@ -35,10 +39,14 @@ export class RegisterComponent implements OnInit{
       });
 
     formData.delete("email");
-    formData.delete("firstName");
-    formData.delete("lastName");
+    formData.delete("first_name");
+    formData.delete("last_name");
+    formData.delete("city");
+    formData.delete("street");
+    formData.delete("house_number");
+    formData.delete("postcode");
     formData.delete("password");
-    formData.delete("repeatPassword");
+    formData.delete("repeat_password");
   }
 
   getPassword(s:string){

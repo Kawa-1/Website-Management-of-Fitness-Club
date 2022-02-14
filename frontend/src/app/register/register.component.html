@@ -38,7 +38,7 @@
         </div>
         <div class="form-group">
             <div class="input-field">
-            <input required minlength="1" maxlength="20" ngModel name="house_nr" #house_nr="ngModel" type="text" id="house_nr" class="form-control validate" placeholder="House/Flat Number" >
+            <input required minlength="1" maxlength="20" ngModel name="house_nr" #house_nr="ngModel" type="text" id="house_nr" class="form-control validate" placeholder="House number" >
             <label for="house_nr" [attr.data-error]="house_nr.errors != null?(house_nr.errors.required? 'Required Field' :'Minimum 1 characters needed'):''"></label>
             </div>
         </div>
@@ -60,7 +60,7 @@
             <label for="repeatPassword" data-error="Password must match"></label>    
             </div>
         </div>
-        <button class="btn btn-primary" (click)="clicked(email.value, firstName.value, lastName.value, city.value, password.value, repeatPassword.value)" [disabled]="!UserRegisatrationForm.valid || isDisabled">Register</button>
+        <button class="btn btn-primary" (click)="clicked(email.value, firstName.value, lastName.value, city.value, street.value, house_nr.value, postcode.value, password.value, repeatPassword.value)" [disabled]="!UserRegisatrationForm.valid || isDisabled">Register</button>
         <br>
         <div class="recaptcha-style">
             <app-recaptcha (callParent)="getMsgFromBaby()"></app-recaptcha>

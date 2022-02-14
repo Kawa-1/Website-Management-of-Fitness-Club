@@ -11,10 +11,8 @@ from myapplication.error_handler.err_handler import error_handler
 
 
 class Test(Resource):
-    @token_required
     def get(self):
-        #send_email_confirm("Papercut@user.com")
-        return "git"
+        send_email_confirm("Papercut@user.com")
 
     def post(self):
         return "HEJ"
@@ -40,14 +38,6 @@ class RegisterUserApi(Resource):
         cmd = 'SELECT * FROM fit.users WHERE email=\'%s\'' % email
         user = db.session.execute(cmd).cursor.fetchone()
         print(user)
-
-        if not first_name or not last_name or not city or not street or not house_number or not postcode or not email or\
-            not password or not repeat_password:
-            err_resp = {"errors": {"description": "One of the fields has not been provided",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
-            return err_resp, 400
-
         if check_email(email) is False:
             err_resp = {"errors": {"description": "Format of email is incorrect",
                                     "method": "POST", "name": "Failed registration", "status": 400,
@@ -65,21 +55,12 @@ class RegisterUserApi(Resource):
             return err_resp, 400
 
         if check_postcode(postcode) is False:
-            err_resp = {"errors": {"description": "Check postcode failed",
-                        "method": "POST", "name": "Failed registration", "status": 400,
-                        "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         if password != repeat_password:
-            err_resp = {"errors": {"description": "Passwords are not correct",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         if check_number(house_number) is False:
-            err_resp = {"errors": {"description": "Check house number failed",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
-                                   "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         first_name = clean(first_name)
@@ -269,16 +250,8 @@ class PasswordUserApi(Resource):
         return resp, 201
 
 
-class refresh_token(Resource):
-    @token_required
-    def post(self, current_user=None):
-        if current_user is None:
-            err_resp = {"message": {"description": "Lack of user", "status": 400,
-                                    "name": "Can't refresh token",
-                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
-            return err_resp, 400
 
-        data = jwt.decode
+
 
 
 

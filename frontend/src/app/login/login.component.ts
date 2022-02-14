@@ -19,13 +19,20 @@ export class LoginComponent {
   user: User = new User();
 
   onLogin(email:string, password:string): void {
+    var formData: any = new FormData();
+
+    formData.append("email", email);
+    formData.append("password", password);
+
     this.user.email = email;
     this.user.password = password;
 
-    this.auth.login(this.user)
-    .then((user) => {
-      this.cookieService.set('token', user.token);
-      this.toastr.success('Logged in succesfully');
+    this.auth.login(formData)
+    .subscribe(
+      data => {
+        console.log(data)
+      // this.cookieService.set('token', user.token);
+      // this.toastr.success('Logged in succesfully');
     });
   }
 

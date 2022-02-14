@@ -17,7 +17,9 @@ export class AuthInterceptor implements HttpInterceptor{
                         this.toastr.error('Email already in use');
                     }
                     else if(req.url=="http://localhost:5000/api/login"){
-                        this.toastr.error(error.error.message);
+                        // this.toastr.error(error.error.message);
+                        console.log("XD")
+                        console.log(error.error.message)
                     }
                     else if(req.url=="http://localhost:5000/api/status"){
                     }
