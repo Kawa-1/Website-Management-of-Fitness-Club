@@ -21,9 +21,6 @@ class Test(Resource):
 
 class RegisterUserApi(Resource):
     def post(self):
-        err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
-                                "method": "POST", "name": "Failed registration", "status": 400, "timestamp": str(datetime.utcnow())}}
-
         first_name = request.form.get("first_name")
         last_name = request.form.get("last_name")
         city = request.form.get('city')
@@ -62,6 +59,9 @@ class RegisterUserApi(Resource):
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
+            err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
+                                   "method": "POST", "name": "Failed registration", "status": 400,
+                                   "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
         if check_postcode(postcode) is False:
@@ -107,7 +107,7 @@ class RegisterUserApi(Resource):
         db.session.commit()
 
         created_resp = {"message": {"description": "new user created", "confirmation_email": send[1], "status": 201,
-                                     "name": "registration", "method": "POST", "timestamp": str(datetime.utcnow())()}, "user":
+                                     "name": "registration", "method": "POST", "timestamp": str(datetime.utcnow())}, "user":
             {"first_name": first_name, "last_name": last_name, "confirmed": False}}
         created_resp = json.dumps(created_resp, indent=4, sort_keys=True)
         return created_resp, 201
@@ -193,13 +193,16 @@ class LoginUserApi(Resource):
                             "timestamp": str(datetime.utcnow())()},
                 "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name, "is_instructor": user.is_instructor
                          }}
-        return resp, 201
+        resp = jsonify(resp)
+        resp.status_code = 201
+        resp.headers["Access-Control-Allow-Origin"] = "http://localhost:4200"
+        return resp
 
 
 class LogoutUserApi(Resource):
     @token_required
     def post(self, current_user=None):
-        auth_token = request.headers['x-access-tokens']
+        auth_token = request.headers.get('x-access-tokens')
 
         if current_user is None:
             err_resp = {"message": {"description": "This token is invalid", "status": 403, "name": "Failed blacklisting of token",
@@ -272,13 +275,60 @@ class PasswordUserApi(Resource):
 class refresh_token(Resource):
     @token_required
     def post(self, current_user=None):
+        key = current_app.config['SECRET_KEY']
         if current_user is None:
             err_resp = {"message": {"description": "Lack of user", "status": 400,
                                     "name": "Can't refresh token",
                                     "method": "POST", "timestamp": str(datetime.utcnow())}}
             return err_resp, 400
 
-        data = jwt.decode
+        token = request.headers.get("x-access-token")
+
+        if token is None:
+            err_resp = {"message": {"description": "Lack of user", "status": 400,
+                                    "name": "Can't refresh token",
+                                    "method": "POST", "timestamp": str(datetime.utcnow())}}
+            return err_resp, 400
+
+        ep = datetime(1970, 1, 1, 0, 0, 0)
+        now = (datetime.utcnow() - ep).total_seconds()
+        expire = jwt.decode(token, key).get("exp")
+        time_to_expire = expire - now
+
+        if time_to_expire > 7200:
+            err_resp = {"message": {"description": "Only tokens with expire time < 2h can be refreshed", "status": 201,
+                                "name": "Token has not been refreshed",
+                                "method": "POST", "timestamp": str(datetime.utcnow())}}
+            return err_resp, 400
+
+        err_resp = {"message": {"description": "Token can't be blacklisted", "status": 200,
+                                "name": "Token is invalid",
+                                "method": "POST", "timestamp": str(datetime.utcnow())}}
+
+        if token:
+            if BlackListToken.check_blacklist(token):
+                if isinstance(token, str):
+                    blacklist_token = BlackListToken(token=token)
+                    db.session.add(blacklist_token)
+                    db.session.commit()
+
+                else:
+                    return err_resp, 400
+
+            else:
+                return err_resp, 400
+
+        else:
+            return err_resp, 400
+
+
+        new_token = jwt.encode({"id": current_user.id, "email": current_user.email, "first_name": current_user.first_name, "last_name": current_user.last_name,
+                            "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
+
+        resp = {"message": {"description": "Old Token has been blacklisted and new one is generated", "status": 200, "name": "Old Token is blacklisted; new one generated",
+                            "method": "POST","token": new_token ,"timestamp": str(datetime.utcnow())}}
+
+        return resp, 201
 
 
 
