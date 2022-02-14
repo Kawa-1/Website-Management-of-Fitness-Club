@@ -12,15 +12,20 @@ import { catchError, map } from 'rxjs/operators';
 export class AuthService {
   private path = "http://localhost:5000/api";
   private headers: HttpHeaders = new HttpHeaders({'Content-Type': 'application/json',
-                                                'Access-Control-Allow-Origin': '*'});
+                                                  'Access-Control-Allow-Origin': '*'});
   constructor(
     private http: HttpClient
   ){}
 
-  login(user: User) {
+  login(user: User): Promise<any> {
     let url: string = this.path + "/login";
-    return this.http.post(url, user, {headers: this.headers});
+    return this.http.post(url, user, {headers: this.headers}).toPromise();
   }
+
+  // login(user: User) {
+  //   let url: string = this.path + "/login";
+  //   return this.http.post(url, user, {headers: this.headers});
+  // }
 
   ensureAuthenticated(token:any): Promise<any> {
     let url: string = this.path + "/status";
