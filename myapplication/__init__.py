@@ -149,6 +149,23 @@ def create_app():
         db.session.commit()
         print('done')
 
+    @app.before_first_request
+    def facilities(Facilities=Facilities):
+        facility_1 = Facilities(city="Cracow", street="Obi-Wan-Kenobi", house_number=72, postcode="30-110",
+                                contact_number=999999999,
+                                email="fitness-cracow@fitness.com")
+        facility_2 = Facilities(city="Warsaw", street="Aragorn", house_number=12, postcode="00-921",
+                                contact_number=911131111,
+                                email="fitness-warsaw@fitness.com")
+        facility_3 = Facilities(city="Gdansk", street="Geralt", house_number=10, postcode="10-531",
+                                contact_number=310131770,
+                                email="fitness-gdansk@fitness.com")
+        db.session.add(facility_1)
+        db.session.add(facility_2)
+        db.session.add(facility_3)
+
+        db.session.commit()
+
 
 
     @app.route('/', methods=['GET'])
@@ -247,7 +264,17 @@ class ValuesInitTable:
 
     @staticmethod
     def facilities(Facilities):
-        pass
+        facility_1 = Facilities(city="Cracow", street="Obi-Wan-Kenobi", house_number=72, postcode="30-110", contact_number=999999999,
+                                email="fitness-cracow@fitness.com")
+        facility_2 = Facilities(city="Warsaw", street="Aragorn", house_number=12, postcode="00-921", contact_number=911131111,
+                                email="fitness-warsaw@fitness.com")
+        facility_3 = Facilities(city="Gdansk", street="Geralt", house_number=10, postcode="10-531", contact_number=310131770,
+                                email="fitness-gdansk@fitness.com")
+        db.session.add(facility_1)
+        db.session.add(facility_2)
+        db.session.add(facility_3)
+
+        db.session.commit()
 
 
 def star(func):
