@@ -16,6 +16,8 @@ import { HomeComponent } from './home/home.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { RecaptchaComponent } from './recaptcha/recaptcha.component';
 import { NavbarComponent } from './navbar/navbar.component';
+import { YourProfileComponent } from './your-profile/your-profile.component';
+import { ActivitiesComponent } from './activities/activities.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { NavbarComponent } from './navbar/navbar.component';
     NotFoundComponent,
     RecaptchaComponent,
     NavbarComponent,
+    YourProfileComponent,
+    ActivitiesComponent,
   ],
   imports: [
     FormsModule,

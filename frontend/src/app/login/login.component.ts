@@ -19,31 +19,31 @@ export class LoginComponent {
   user: User = new User();
 
   onLogin(email:string, password:string): void {
-    // this.user.email = email;
-    // this.user.password = password;
-
-    // this.auth.login(this.user)
-    // .then((user) => {
-    //   console.log(user)
-    //   this.cookieService.set('token', user.token);
-    //   this.toastr.success('Logged in succesfully');
-    // });
-
-    var formData: any = new FormData();
-
-    formData.append("email", email);
-    formData.append("password", password);
-
     this.user.email = email;
     this.user.password = password;
 
-    this.auth.login(formData)
-    .subscribe(
-      data => {
-        console.log(data)
-      // this.cookieService.set('token', user.token);
-      // this.toastr.success('Logged in succesfully');
+    this.auth.login(this.user)
+    .then((user) => {
+      console.log(user)
+      this.cookieService.set('token', user.token);
+      this.toastr.success('Logged in succesfully');
     });
+
+    // var formData: any = new FormData();
+
+    // formData.append("email", email);
+    // formData.append("password", password);
+
+    // this.user.email = email;
+    // this.user.password = password;
+
+    // this.auth.login(formData)
+    // .subscribe(
+    //   data => {
+    //     console.log(data)
+    //   // this.cookieService.set('token', user.token);
+    //   // this.toastr.success('Logged in succesfully');
+    // });
   }
 
   clicked(email:string, password:string){
