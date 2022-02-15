@@ -17,15 +17,15 @@ export class AuthService {
     private http: HttpClient
   ){}
 
-  // login(user: User): Promise<any> {
-  //   let url: string = this.path + "/login";
-  //   return this.http.post(url, user, {headers: this.headers}).toPromise();
-  // }
-
-  login(user: User) {
+  login(user: User): Promise<any> {
     let url: string = this.path + "/login";
-    return this.http.post(url, user);
+    return this.http.post(url, user).toPromise();
   }
+
+  // login(user: User) {
+  //   let url: string = this.path + "/login";
+  //   return this.http.post(url, user);
+  // }
 
   ensureAuthenticated(token:any): Promise<any> {
     let url: string = this.path + "/status";
@@ -38,7 +38,7 @@ export class AuthService {
 
   logout(token:MyToken): Promise<any> {
     let url: string = this.path + "/logout";
-    return this.http.post(url, token, {headers: this.headers}).toPromise();
+    return this.http.post(url, token).toPromise();
   }
 
   register(form:FormData) {

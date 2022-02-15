@@ -1,0 +1,14 @@
+<div class="page-title" [hidden]="isLoggedIn">
+    <h2>Login first</h2>
+    <p class="lead">
+    </p>
+</div>
+
+<div class="logged_in_form" [hidden]="!isLoggedIn">
+    <div class="page-title">
+        <h2>Welcome {{usersUsername}}</h2>
+        <p class="lead">
+        </p>
+    </div>
+    <button class="btn btn-primary" id="logout" (click)="logout()">Logout</button>
+</div>
