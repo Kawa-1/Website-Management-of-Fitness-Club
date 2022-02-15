@@ -5,7 +5,7 @@ from flask import request, json, current_app, url_for
 from flask_mail import Message
 from datetime import datetime
 from myapplication import mail
-from myapplication.models import Users
+from myapplication.models import Users, BlackListToken
 
 timestamp = str(datetime.utcnow())
 
@@ -14,22 +14,40 @@ def token_required(f):
 	def decorator(*args, **kwargs):
 		token = None
 
-		if 'x-access-tokens' in request.headers:
-			token = request.headers['x-access-tokens']
+		if 'Authorization' in request.headers:
+			auth_value = request.headers['Authorization']
+			try:
+				token = auth_value.split(" ")[1]
+				if not BlackListToken.check_blacklist(token):
+					err_resp = {
+						"message": {"description": "Token already blacklisted",
+									"name": "Token already blacklisted",
+									"status": 401, 'timestamp': timestamp}}
+					return err_resp, 401
+			except Exception as e:
+				err_resp = {
+					"message": {"description": "Value of header 'Authorization' is in bad format; Proper format: 'Bearer \
+											   `cipher`", "name": "Bad format of 'Authorization' header",
+								"status": 401, 'timestamp': timestamp}}
+				return err_resp, 401
 
 		if not token:
 			err_resp = {"message": {"description": "Valid token is missing", "name": "token required", "status": 401,
 									'timestamp': timestamp}}
-			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 			return err_resp, 401
 
 		try:
 			data = jwt.decode(token, current_app.config['SECRET_KEY'])
 			current_user = Users.query.filter_by(id=data['id']).first()
+			if current_user is None:
+				err_resp = {
+					"message": {"description": "Such user doesn't exist", "status": 401, "name": "Cannot auth; token required",
+								'timestamp': timestamp}}
+				return err_resp, 404
+
 		except Exception as e:
 			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
 									'timestamp': timestamp}}
-			err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 			return err_resp, 401
 
 		return f(current_user, *args, **kwargs)

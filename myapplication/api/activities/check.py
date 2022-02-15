@@ -24,3 +24,7 @@ def check_month_format(month):
     else:
         return False
 
+def limit_parameter(f):
+    def decorator(*args, **kwargs):
+        pass
+

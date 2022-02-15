@@ -135,9 +135,9 @@ class BlackListToken(db.Model):
         # check whether auth token has been blacklisted
         res = BlackListToken.query.filter_by(token=str(auth_token)).first()
         if res:
-            return False
-        else:
             return True
+        else:
+            return False
 
 class Test(db.Model):
     __tablename__ = 'participation'

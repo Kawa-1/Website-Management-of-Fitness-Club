@@ -65,6 +65,9 @@ def create_app():
     from myapplication.api.auth.api import PasswordUserApi
     api.add_resource(PasswordUserApi, "/api/change_password")
 
+    from myapplication.api.auth.api import UserApi
+    api.add_resource(UserApi, "/api/status")
+
     from myapplication.api.activities.classes import UserActivityApi
     api.add_resource(UserActivityApi, "/api/user_activity/<int:class_id>", "/api/user_activity")
 
@@ -83,6 +86,7 @@ def create_app():
             None
         )
         if http_origin and re.search(r'^[a-zA-Z0-9\-\_\/\:\.]+$', http_origin, re.DOTALL):
+            response.headers['Content-Type'] = "application/json"
             response.headers['Access-Control-Allow-Origin'] = http_origin
             response.headers['Access-Control-Allow-Credentials'] = "true"
             response.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -99,6 +103,9 @@ def create_app():
         #r = db.engine.execute('SELECT * FROM users;')
         data = request.get_json(silent=True)
         print(data)
+        g.user = arguments
+        print(g)
+        print(g.user)
         js = {"message": {"hej": "hej"}}
         js = jsonify(js)
         js.status_code = 200

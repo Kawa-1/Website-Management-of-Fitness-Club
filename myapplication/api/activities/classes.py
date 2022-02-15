@@ -35,7 +35,6 @@ class ActivityApi(Resource):
                 err_resp = {"message": {
                     "description": "Argument limit must be int",
                     "status": 400, "name": "invalid format of parameter limit", "method": "GET", "timestamp": timestamp}}
-                err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
                 return err_resp, 400
 
         if date is None:
@@ -48,7 +47,10 @@ class ActivityApi(Resource):
                     LIMIT %d""" % limit
             activity = db.session.execute(cmd).cursor.fetchall()
             if len(activity) == 0:
-                return ("", 204)
+                resp = {"message": {
+                    "description": "There are no activities at all",
+                    "status": 204, "name": "lack of activities", "method": "GET", "timestamp": timestamp}}
+                return resp, 204
 
             dictionary = {"activities": []}
             for obj in activity:
@@ -82,12 +84,12 @@ class ActivityApi(Resource):
         print(len(activity))
         # It means there is no activities that day
         if len(activity) == 0:
-            # resp = {"message": "There are no activities on this day", "status": 204, "method": "GET"}
-            # resp = json.dumps(resp, indent=4, sort_keys=True)
-            # print(resp)
-            return ("", 204)
+            resp = {"message": {"description": "There are no activities", "status": 204, "method": "GET",
+                                "timestamp": timestamp}}
+            return resp, 204
 
-        dictionary = {"activities": []}
+        dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
+                                  "method": "GET", "timestamp": timestamp}, "activities": []}
         for obj in activity:
             for obj in activity:
                 dictionary['activities'].append(
@@ -96,7 +98,7 @@ class ActivityApi(Resource):
                      'last_name': obj[7], 'email': obj[8]})
 
         #dictionary['activities'] = sorted(dictionary['activities'], key = lambda i: i['date'], reverse=False)
-        dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
+        #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
         return dictionary, 200
 
 
@@ -117,7 +119,8 @@ class UserActivityApi(Resource):
                     ORDER BY c.date DESC;""" % user_id
 
         classes_user_took = db.session.execute(cmd).cursor.fetchall()
-        dictionary = {"activities": []}
+        dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
+                                  "method": "GET", "timestamp": timestamp}, "activities": []}
 
         for activity in classes_user_took:
             dictionary['activities'].append({"type_of_classes": classes_user_took[0], "date": classes_user_took[1],
@@ -127,7 +130,6 @@ class UserActivityApi(Resource):
                                              "number_users_enrolled_total": classes_user_took[7], "id": classes_user_took[8],
                                              "price": classes_user_took[9], "service": classes_user_took[10]})
 
-        dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
         return dictionary, 200
 
     @token_required

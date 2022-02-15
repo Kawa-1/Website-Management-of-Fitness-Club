@@ -1,5 +1,5 @@
 import jwt
-from flask_restful import Resource, request, current_app
+from flask_restful import Resource, request, current_app, marshal_with, fields
 from datetime import datetime, timedelta
 from flask import json, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +11,7 @@ from myapplication.error_handler.err_handler import error_handler
 
 timestamp = str(datetime.utcnow())
 
+
 class Test(Resource):
     @token_required
     def get(self):
@@ -19,6 +20,30 @@ class Test(Resource):
 
     def post(self):
         return "HEJ"
+
+
+class UserApi(Resource):
+    #user_fields = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
+    #                        "timestamp": timestamp},
+    #            "user": {"first_name": fields.String, "last_name": fields.String, "city": fields.String,
+    #                     "street": fields.String, "house_number": fields.Integer, "postcode": fields.String,
+    #                     "email": fields.String, "is_instructor": fields.Integer,
+    #                     "created_at": fields.DateTime(dt_format='rfc822'), "confirmed": fields.Integer}}
+
+    #@marshal_with(user_fields)
+    @token_required
+    def get(self, current_user):
+        resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
+                            "timestamp": timestamp},
+                "user": {"first_name": current_user.first_name, "last_name": current_user.last_name, "city": current_user.city,
+                         "street": current_user.street, "house_number": current_user.house_number, "postcode": current_user.postcode,
+                         "email": current_user.email, "is_instructor": current_user.is_instructor,
+                         "created_at": str(current_user.created_at), "confirmed": current_user.confirmed}}
+        resp = jsonify(resp)
+        resp.status_code = 200
+        return resp
+        # return current_user
+
 
 class RegisterUserApi(Resource):
     def post(self):
@@ -166,16 +191,16 @@ class ConfirmEmail(Resource):
 
 class LoginUserApi(Resource):
     def post(self):
-        # post_data = request.get_json()
-        # key = current_app.config['SECRET_KEY']
-
-        # email = post_data.get('email')
-        # password = post_data.get('password')
-
+        post_data = request.get_json()
         key = current_app.config['SECRET_KEY']
 
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = post_data.get('email')
+        password = post_data.get('password')
+
+        # key = current_app.config['SECRET_KEY']
+
+        # email = request.form.get('email')
+        # password = request.form.get('password')
 
         user = Users.query.filter_by(email=email).first()
 
@@ -197,32 +222,24 @@ class LoginUserApi(Resource):
 
         resp = {"message": {"description": "Token prepared properly", "status": 201, "name": "login", "token": token, "method": "POST",
                             "timestamp": timestamp},
-                "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name, "is_instructor": user.is_instructor
-                         }}
+                "user": {"email": user.email, "first_name": user.first_name, "last_name": user.last_name,
+                         "is_instructor": user.is_instructor}}
         resp = jsonify(resp)
         resp.status_code = 201
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        print(resp)
         return resp
 
 
 class LogoutUserApi(Resource):
     @token_required
     def post(self, current_user=None):
-        auth_token = request.headers.get('x-access-tokens')
-
-        if current_user is None:
-            err_resp = {"message": {"description": "This token is invalid", "status": 403, "name": "Failed blacklisting of token",
-                                    "method": "POST", "timestamp": timestamp}}
-            return err_resp, 403
+        auth_token = request.headers.get('Authorization').split(" ")[1]
 
         email_current_user = current_user.email
 
         if auth_token:
-            if BlackListToken.check_blacklist(auth_token):
+            if not BlackListToken.check_blacklist(auth_token):
                 if isinstance(auth_token, str):
                     blacklist_token = BlackListToken(token=auth_token)
-
                     db.session.add(blacklist_token)
                     db.session.commit()
                     resp = {"message": {"description": "User has logged out", "status": 200, "name": "Token is blacklisted",
@@ -251,15 +268,8 @@ class LogoutUserApi(Resource):
 class PasswordUserApi(Resource):
     @token_required
     def put(self, current_user=None):
-        token = request.headers.get('x-access-tokens')
         password = request.form.get('password')
         repeat_password = request.form.get('repeat_password')
-
-        if token is None:
-            err_resp = {"message": {"description": "Lack of token", "status": 401,
-                                    "name": "Can't change password",
-                                    "method": "PUT", "timestamp": timestamp}}
-            return err_resp, 401
 
         if password != repeat_password:
             err_resp = {"message": {"description": "Password is not the same as 'repeat_password'", "status": 400,
@@ -283,19 +293,7 @@ class refresh_token(Resource):
     @token_required
     def post(self, current_user=None):
         key = current_app.config['SECRET_KEY']
-        if current_user is None:
-            err_resp = {"message": {"description": "Lack of user", "status": 400,
-                                    "name": "Can't refresh token",
-                                    "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
-
-        token = request.headers.get("x-access-token")
-
-        if token is None:
-            err_resp = {"message": {"description": "Lack of user", "status": 400,
-                                    "name": "Can't refresh token",
-                                    "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
+        token = request.headers.get("Authorization").split(" ")[1]
 
         ep = datetime(1970, 1, 1, 0, 0, 0)
         now = (datetime.utcnow() - ep).total_seconds()
@@ -313,7 +311,7 @@ class refresh_token(Resource):
                                 "method": "POST", "timestamp": timestamp}}
 
         if token:
-            if BlackListToken.check_blacklist(token):
+            if not BlackListToken.check_blacklist(token):
                 if isinstance(token, str):
                     blacklist_token = BlackListToken(token=token)
                     db.session.add(blacklist_token)
@@ -328,12 +326,11 @@ class refresh_token(Resource):
         else:
             return err_resp, 400
 
-
         new_token = jwt.encode({"id": current_user.id, "email": current_user.email, "first_name": current_user.first_name, "last_name": current_user.last_name,
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Old Token has been blacklisted and new one is generated", "status": 200, "name": "Old Token is blacklisted; new one generated",
-                            "method": "POST","token": new_token ,"timestamp": timestamp}}
+                            "method": "POST","token": new_token, "timestamp": timestamp}}
 
         return resp, 201
 
