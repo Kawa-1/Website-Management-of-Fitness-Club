@@ -11,6 +11,7 @@ from flask_migrate import Migrate
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.exceptions import HTTPException
+from werkzeug.security import generate_password_hash
 from datetime import datetime
 from myapplication.error_handler.err_handler import error_handler
 
@@ -40,7 +41,7 @@ def create_app():
     Conf.load_conf_db(app, crypt_ob)
     Conf.load_conf_mail(app, crypt_ob)
 
-    from myapplication.models import Users, Facilities, Subscriptions, PriceList, Classes, Participation
+    from myapplication.models import Users, Facilities, Subscriptions, PriceList, Activities, Participation, TypesOfActivities, ServiceNames
     db.init_app(app)
     migrate.init_app(app, db)
     db.create_all(app=app)
@@ -69,7 +70,7 @@ def create_app():
     api.add_resource(UserApi, "/api/status")
 
     from myapplication.api.activities.classes import UserActivityApi
-    api.add_resource(UserActivityApi, "/api/user_activity/<int:class_id>", "/api/user_activity")
+    api.add_resource(UserActivityApi, "/api/user_activity/<int:activity_id>", "/api/user_activity")
 
     from myapplication.api.activities.classes import ActivityApi
     api.add_resource(ActivityApi, "/api/activity_api/<string:date>", "/api/activity_api")
@@ -98,6 +99,57 @@ def create_app():
             if http_access_control_request_headers:
                 response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
         return response
+
+    @app.before_first_request
+    def service_names_activities_names(TypesOfActivities=TypesOfActivities, ServiceNames=ServiceNames):
+        yoga = TypesOfActivities(name_of_activity='yoga')
+        crossfit = TypesOfActivities(name_of_activity='crossfit')
+        abs = TypesOfActivities(name_of_activity='abs')
+        pilates = TypesOfActivities(name_of_activity='pilates')
+        aerobic = TypesOfActivities(name_of_activity='aerobic')
+        ems = TypesOfActivities(name_of_activity='ems')
+        stretching = TypesOfActivities(name_of_activity='stretching')
+        box = TypesOfActivities(name_of_activity='box')
+        db.session.add(yoga)
+        db.session.add(crossfit)
+        db.session.add(abs)
+        db.session.add(pilates)
+        db.session.add(aerobic)
+        db.session.add(ems)
+        db.session.add(stretching)
+        db.session.add(box)
+
+        pass_ = ServiceNames(service='pass')
+        activities = ServiceNames(service='activity')
+        db.session.add(pass_)
+        db.session.add(activities)
+
+        db.session.commit()
+        print('done')
+
+    @app.before_first_request
+    def instructors(Users=Users):
+        password = generate_password_hash('123456789')
+        instructor_1 = Users(first_name="Jacek", last_name="Soplica", city="Cracow", street="Reymont", house_number=10,
+                             postcode="31-100", email='jacek@onet.com', password=password, is_instructor=1, confirmed=1)
+        instructor_2 = Users(first_name="Ksiądz", last_name="Robak", city="Warsaw", street="Gdanska", house_number=53,
+                             postcode="00-120", email='robak@onet.com', password=password, is_instructor=1, confirmed=1)
+        instructor_3 = Users(first_name="Grzegorz", last_name="Brzęczyszczykiewicz", city="Trzebrzeszyn",
+                             street="Szczedrzykowska",
+                             house_number=99, postcode="10-333", email='szcz@onet.com', password=password,
+                             is_instructor=1, confirmed=1)
+        instructor_4 = Users(first_name="Franek", last_name="Dolas", city="Wroclove", street="fabryczna",
+                             house_number=38,
+                             postcode="21-921", email='dolas@onet.com', password=password, is_instructor=1, confirmed=1)
+        db.session.add(instructor_1)
+        db.session.add(instructor_2)
+        db.session.add(instructor_3)
+        db.session.add(instructor_4)
+
+        db.session.commit()
+        print('done')
+
+
 
     @app.route('/', methods=['GET'])
     def hello():
@@ -145,6 +197,57 @@ class AfterRequest:
             if http_access_control_request_headers:
                 response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
         return response
+
+
+class ValuesInitTable:
+
+    @staticmethod
+    def service_names_activities_names(TypesOfActivities, ServiceNames):
+        yoga = TypesOfActivities('yoga')
+        crossfit = TypesOfActivities('crossfit')
+        abs = TypesOfActivities('abs')
+        pilates = TypesOfActivities('pilates')
+        aerobic = TypesOfActivities('aerobic')
+        ems = TypesOfActivities('ems')
+        stretching = TypesOfActivities('stretching')
+        box = TypesOfActivities('box')
+        db.session.add(yoga)
+        db.session.add(crossfit)
+        db.session.add(abs)
+        db.session.add(pilates)
+        db.session.add(aerobic)
+        db.session.add(ems)
+        db.session.add(stretching)
+        db.session.add(box)
+
+        pass_ = ServiceNames('pass')
+        activities = ServiceNames('activity')
+        db.session.add(pass_)
+        db.session.add(activities)
+
+        db.session.commit()
+
+    @staticmethod
+    def instructors(Users):
+        password = generate_password_hash('123456789')
+        instructor_1 = Users(first_name="Jacek", last_name="Soplica", city="Cracow", street="Reymont", house_number=10,
+                             postcode="31-100", email='jacek@onet.com', password=password, is_instructor=1, confirmed=1)
+        instructor_2 = Users(first_name="Ksiądz", last_name="Robak", city="Warsaw", street="Gdanska", house_number=53,
+                             postcode="00-120", email='robak@onet.com', password=password, is_instructor=1, confirmed=1)
+        instructor_3 = Users(first_name="Grzegorz", last_name="Brzęczyszczykiewicz", city="Trzebrzeszyn", street="Szczedrzykowska",
+                             house_number=99, postcode="10-333", email='szcz@onet.com', password=password, is_instructor=1, confirmed=1)
+        instructor_4 = Users(first_name="Franek", last_name="Dolas", city="Wroclove", street="fabryczna", house_number=38,
+                             postcode="21-921", email='dolas@onet.com', password=password, is_instructor=1, confirmed=1)
+        db.session.add(instructor_1)
+        db.session.add(instructor_2)
+        db.session.add(instructor_3)
+        db.session.add(instructor_4)
+
+        db.session.commit()
+
+    @staticmethod
+    def facilities(Facilities):
+        pass
 
 
 def star(func):

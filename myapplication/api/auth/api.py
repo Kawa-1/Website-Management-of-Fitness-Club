@@ -135,7 +135,6 @@ class RegisterUserApi(Resource):
         created_resp = {"message": {"description": "new user created", "confirmation_email": send[1], "status": 201,
                                      "name": "registration", "method": "POST", "timestamp": timestamp}, "user":
             {"first_name": first_name, "last_name": last_name, "confirmed": False}}
-        created_resp = json.dumps(created_resp, indent=4, sort_keys=True)
         return created_resp, 201
 
 

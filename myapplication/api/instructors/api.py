@@ -32,8 +32,7 @@ class InstructorsApi(Resource):
                     "timestamp": timestamp}}
                 return err_resp, 400
 
-        cmd = """SELECT u.first_name, u.last_name, u.email, FROM fit.users u\
-                            WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
+        cmd = """SELECT u.first_name, u.last_name, u.email FROM fit.users u WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
         instructors = db.session.execute(cmd).fetchall()
 
         if len(instructors) == 0:
@@ -52,7 +51,7 @@ class InstructorsApi(Resource):
         return resp, 200
 
     def post(self):
-        """Getting classes with facilities involved with particular instructor"""
+        """Getting activities with facilities involved with particular instructor"""
         post_data = request.get_json()
         email = post_data.get("email")
         limit = post_data.get("limit")
@@ -67,14 +66,14 @@ class InstructorsApi(Resource):
         if user is None:
             err_resp = {"message": {"description": "There is not even single instructor!", "name": "lack of instructors",
                                 "status": 204, "method": "GET", "timestamp": timestamp},
-                    "classes": [],
+                    "activities": [],
                     "instructor": {}}
             return err_resp, 204
         if email is None:
             err_resp = {
                 "message": {"description": "Please provide json in body; optionally limit and offset, but email is a must!",
                             "name": "lack of instructors", "status": 400, "method": "GET", "timestamp": timestamp},
-                "classes": [],
+                "activities": [],
                 "instructor": {}}
             return err_resp, 400
 
@@ -82,31 +81,32 @@ class InstructorsApi(Resource):
             err_resp = {
                 "message": {"description": "Bad format of email!", "name": "lack of instructors",
                             "status": 400, "method": "GET", "timestamp": timestamp},
-                "classes": [],
+                "activities": [],
                 "instructor": {}}
             return err_resp, 400
 
         cmd = """SELECT u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, f.postcode, f.contact_number,
-                    f.email, c.date, c.type_of_classes 
+                    f.email, a.date, t.name_of_activity 
                     FROM fit.users u
-                    INNER JOIN fit.classes c ON u.id=c.instructor_id
-                    INNER JOIN fit.facilities f ON f.id=c.facility_id
+                    INNER JOIN fit.activities a ON u.id=a.instructor_id
+                    INNER JOIN fit.facilities f ON f.id=a.facility_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
                     WHERE u.email=\'%s\' AND u.is_instructor=1
-                    ORDER BY c.date DESC OFFSET %d LIMIT %d""" % (email, offset, limit)
+                    ORDER BY a.date DESC OFFSET %d LIMIT %d""" % (email, offset, limit)
 
         instructors_activities = db.session.execute(cmd).cursor.fetchall()
 
         if len(instructors_activities) == 0:
             resp = {"message": {"description": "There are no activities involved with this instructor!",
-                                "name": "classes&facilities {}".format(email),
+                                "name": "activities&facilities {}".format(email),
                                 "status": 204, "method": "POST", "timestamp": timestamp},
-                    "classes": [],
+                    "activities": [],
                     "instructor": {"email": email}}
             return resp, 204
 
-        resp = {"message": {"description": "classes & facilities returned!", "name": "classes&facilities {}".format(email),
+        resp = {"message": {"description": "activities & facilities returned!", "name": "activities&facilities {}".format(email),
                             "status": 200, "method": "POST", "timestamp": timestamp},
-                "classes": [],
+                "activities": [],
                 "instructor": {}}
 
         resp["instructor"]["first_name"] = instructors_activities[0][0]
@@ -114,10 +114,10 @@ class InstructorsApi(Resource):
         resp["instructor"]["email"] = instructors_activities[0][2]
 
         for instructor in instructors_activities:
-            resp["classes"].append(
+            resp["activities"].append(
                 {"city": instructor[3], "street": instructor[4], "house_number": instructor[5], "postcode": instructor[6],
                  "contact_number": instructor[7], "email_facility": instructor[8], "date": instructor[9],
-                 "type_of_classes": instructor[10]})
+                 "type_of_activity": instructor[10]})
 
         return resp, 200
 

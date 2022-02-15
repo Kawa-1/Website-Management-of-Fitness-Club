@@ -24,24 +24,7 @@ class Users(db.Model):
 
     user_participations = db.relationship('Participation', backref='user_participations', lazy=True)
     user_subscriptions = db.relationship('Subscriptions', backref='user_subscriptions', lazy=True)
-    user_instructor_classes = db.relationship('Classes', backref='user_instructor_classes', lazy=True)
-
-
-# class Instructors(db.Model):
-#     __tablename__ = 'instructors'
-#     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#     first_name = db.Column(db.String(100), nullable=False)
-#     last_name = db.Column(db.String(100), nullable=False)
-#     city = db.Column(db.String(100), nullable=False)
-#     street = db.Column(db.String(100), nullable=False)
-#     house_number = db.Column(db.Integer, nullable=False)
-#     postcode = db.Column(db.String(100), nullable=False)
-#     email = db.Column(db.String(100), nullable=False, unique=True)
-#     password = db.Column(db.String(600), nullable=False)
-#
-#     instructor_classes = db.relationship('Classes', backref='instructor_classes', lazy=True)
+    user_instructor_activities = db.relationship('Activities', backref='user_instructor_activities', lazy=True)
 
 
 class Facilities(db.Model):
@@ -56,7 +39,7 @@ class Facilities(db.Model):
     contact_number = db.Column(db.String(100), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
 
-    facility_classes = db.relationship('Classes', backref='facility_activity', lazy=True)
+    facility_activities = db.relationship('Activities', backref='facility_activity', lazy=True)
     facility_subscription = db.relationship('Subscriptions', backref='facility_subscription', lazy=True)
 
 
@@ -85,15 +68,15 @@ class Subscriptions(db.Model):
     price_id = db.Column(db.Integer, db.ForeignKey('fit.price_list.id'))
 
 
-class Classes(db.Model):
-    __tablename__ = "classes"
+class Activities(db.Model):
+    __tablename__ = "activities"
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String, nullable=False, default=datetime.utcnow().strftime("%Y-%m-%d %H-%M"))
 
     #instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
-    type_of_classes_id = db.Column(db.Integer, db.ForeignKey('fit.types_of_activities.id'))
+    type_of_activity_id = db.Column(db.Integer, db.ForeignKey('fit.types_of_activities.id'))
     instructor_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     facility_id = db.Column(db.Integer, db.ForeignKey('fit.facilities.id'))
     price_id = db.Column(db.Integer, db.ForeignKey('fit.price_list.id'))
@@ -106,7 +89,7 @@ class Participation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
-    class_id = db.Column(db.Integer, db.ForeignKey('fit.classes.id'))
+    activity_id = db.Column(db.Integer, db.ForeignKey('fit.activities.id'))
 
 
 class TypesOfActivities(db.Model):
@@ -116,7 +99,7 @@ class TypesOfActivities(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name_of_activity = db.Column(db.String(100), nullable=False)
 
-    activity_name = db.relationship('Classes', backref='activity_name', lazy=True)
+    activity_name = db.relationship('Activities', backref='activity_name', lazy=True)
 
 
 class ServiceNames(db.Model):

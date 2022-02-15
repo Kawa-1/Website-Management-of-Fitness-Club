@@ -95,8 +95,4 @@ class YamlConf:
 
         return data
 
-
 #print(YamlConf.get_yaml_postgres("config_pg.yaml"))
-
-
-

@@ -9,7 +9,7 @@ from myapplication.models import Participation
 
 timestamp = str(datetime.utcnow())
 
-# class involved with classes (classes ~ activity involved with fitness) table
+# class involved with activities (classes ~ activity involved with fitness) table
 class ActivityApi(Resource):
     #@token_required
     #current_user = None
@@ -38,12 +38,13 @@ class ActivityApi(Resource):
                 return err_resp, 400
 
         if date is None:
-            cmd = """SELECT c.date, c.type_of_classes, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
-                    FROM fit.classes c
-                    INNER JOIN fit.facilities f ON c.facility_id=f.id
-                    INNER JOIN fit.price_list p ON c.price_id=p.id
-                    INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=c.instructor_id
-                    ORDER BY c.date DESC 
+            cmd = """SELECT a.date, t.name_of_activity, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
+                    FROM fit.activities a
+                    INNER JOIN fit.facilities f ON a.facility_id=f.id
+                    INNER JOIN fit.price_list p ON a.price_id=p.id
+                    INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=a.instructor_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+                    ORDER BY a.date DESC 
                     LIMIT %d""" % limit
             activity = db.session.execute(cmd).cursor.fetchall()
             if len(activity) == 0:
@@ -55,7 +56,7 @@ class ActivityApi(Resource):
             dictionary = {"activities": []}
             for obj in activity:
                 dictionary['activities'].append(
-                    {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
+                    {"date": obj[0], 'type_of_activity': obj[1], 'city': obj[2], 'street': obj[3],
                      'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
                      'last_name': obj[7], 'email': obj[8]})
 
@@ -64,21 +65,22 @@ class ActivityApi(Resource):
             return dictionary, 200
 
         err_resp = {"errors": [{"description": "Provided bad format of date",
-                                "method": "GET", "name": "Failed obtaining classes", "status": 400, "timestamp": timestamp}]}
+                                "method": "GET", "name": "Failed obtaining activities", "status": 400, "timestamp": timestamp}]}
         err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 
         date = date.replace("_", "-")
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
             return err_resp, 400
 
-        cmd = """SELECT c.date, c.type_of_classes, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
-              FROM fit.classes c 
-              INNER JOIN fit.facilities f ON c.facility_id=f.id
-              INNER JOIN fit.price_list p ON c.price_id=p.id
-              INNER JOIN fit.users u ON u.instructor.id=1 AND u.id=c.instructor_id
-              WHERE c.date~*\'^%s.*\'
-              ORDER BY c.date DESC
-              LIMIT %d """  % date, limit
+        cmd = """SELECT a.date, t.name_of_activity, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
+              FROM fit.activities a 
+              INNER JOIN fit.facilities f ON a.facility_id=f.id
+              INNER JOIN fit.price_list p ON a.price_id=p.id
+              INNER JOIN fit.users u ON u.instructor.id=1 AND u.id=a.instructor_id
+              INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+              WHERE a.date~*\'^%s.*\'
+              ORDER BY a.date DESC
+              LIMIT %d """  % (date, limit)
         activity = db.session.execute(cmd).cursor.fetchall()
         print(activity)
         print(len(activity))
@@ -92,7 +94,7 @@ class ActivityApi(Resource):
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
         for obj in activity:
             dictionary['activities'].append(
-                {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
+                {"date": obj[0], 'type_of_activity': obj[1], 'city': obj[2], 'street': obj[3],
                  'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
                  'last_name': obj[7], 'email': obj[8]})
 
@@ -105,24 +107,25 @@ class UserActivityApi(Resource):
     @token_required
     def get(self, current_user=None):
         user_id = current_user.id
-        # TODO: Get every classes in which particular user took part; DESC - 1st row will be the newest
-        cmd =  """SELECT c.type_of_classes, c.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
-        (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=c.id GROUP BY c.id), c.id, pr.price, pr.service 
-                    FROM fit.classes c 
-                    INNER JOIN fit.users u ON c.instructor_id=u.id AND u.instructor_id=1 
-                    INNER JOIN fit.facilities f ON c.facility_id=f.id 
-                    INNER JOIN fit.participation p ON p.class_id=c.id
-                    INNER JOIN fit.price_list pr ON pr.id=c.price_id
-                    WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.class_id=c.id)
-                    GROUP BY c.id 
-                    ORDER BY c.date DESC;""" % user_id
+        # TODO: Get each activity in which particular user took part; DESC - 1st row will be the newest
+        cmd =  """SELECT t.name_of_activity, a.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
+        (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=c.id GROUP BY c.id), c.id, pr.price, pr.service 
+                    FROM fit.activities a 
+                    INNER JOIN fit.users u ON a.instructor_id=u.id AND u.instructor_id=1 
+                    INNER JOIN fit.facilities f ON a.facility_id=f.id 
+                    INNER JOIN fit.participation p ON p.activity_id=a.id
+                    INNER JOIN fit.price_list pr ON pr.id=a.price_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+                    WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id)
+                    GROUP BY a.id 
+                    ORDER BY a.date DESC;""" % user_id
 
         classes_user_took = db.session.execute(cmd).cursor.fetchall()
         dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
 
         for activity in classes_user_took:
-            dictionary['activities'].append({"type_of_classes": classes_user_took[0], "date": classes_user_took[1],
+            dictionary['activities'].append({"type_of_activity": classes_user_took[0], "date": classes_user_took[1],
                                              "instructor_name": classes_user_took[2], "instructor_surname": classes_user_took[3],
                                              "instructor_email": classes_user_took[4], "fitness_city": classes_user_took[4],
                                              "fitness_street": classes_user_took[5], "fitness_house_number": classes_user_took[6],
@@ -133,19 +136,19 @@ class UserActivityApi(Resource):
 
     @token_required
     def post(self, current_user=None):
-        """Signing up for classes. ID indicates id of activity
+        """Signing up for activities. ID indicates id of activity
             DESIRED BODY: e.g. {"id": 1}
         """
         body = request.get_json(silent=True)
-        class_id = body.get('id')
+        activity_id = body.get('id')
 
-        if not body or class_id is None:
+        if not body or activity_id is None:
             err_resp = {"message": {"description": "lack of information to which activity user want to be signed",
                                     "status": 400, "name": "lack of body; json", "method": "POST", "timestamp":
                                     timestamp}}
             return err_resp, 400
 
-        cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=%d" % class_id
+        cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=%d" % activity_id
         number_of_users = db.session.execute(cmd).cursor.fetchone()
 
         if number_of_users is None:
@@ -160,7 +163,7 @@ class UserActivityApi(Resource):
                                     "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "SELECT user_id FROM fit.participation WHERE user_id=%d AND class_id=%d" %  (current_user.id, class_id)
+        cmd = "SELECT user_id FROM fit.participation WHERE user_id=%d AND activity_id=%d" %  (current_user.id, activity_id)
         res = db.session.execute(cmd).cursor.fetchone()
         if res is not None:
             err_resp = {"message": {
@@ -169,30 +172,30 @@ class UserActivityApi(Resource):
             return err_resp, 400
 
 
-        db.session.add(Participation(user_id=current_user.id, class_id=class_id))
+        db.session.add(Participation(user_id=current_user.id, activity_id=activity_id))
         db.session.commit()
 
-        resp = {"message": {"description": "User properly signed up for activity with email: {} and class_id: {}".format(current_user.email, class_id),
+        resp = {"message": {"description": "User properly signed up for activity with email: {} and activity_id: {}".format(current_user.email, activity_id),
                                     "status": 201, "name": "signed up for activity", "method": "POST", "timestamp": timestamp}}
         return resp, 201
 
     @token_required
-    def delete(self, current_user=None, class_id=None):
-        cmd = "SELECT id FROM fit.classes WHERE id=%d" % class_id
+    def delete(self, current_user=None, activity_id=None):
+        cmd = "SELECT id FROM fit.activities WHERE id=%d" % activity_id
         res = db.session.execute(cmd).cursor.fetchone()
 
-        if class_id is None or res is None:
+        if activity_id is None or res is None:
             err_resp = {"message": {
                 "description": "Such activity doesn't exist, cannot be deleted",
                 "status": 400, "name": "cannot delete", "method": "DELETE", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND class_id=%d" % (current_user.id, class_id)
+        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND activity_id=%d" % (current_user.id, activity_id)
         db.session.execute(cmd)
         db.session.commit()
 
         resp = {"message": {
-            "description": "User properly signed off the activity user's email: {} and class_id: {}".format(current_user.email, class_id),
+            "description": "User properly signed off the activity user's email: {} and activity_id: {}".format(current_user.email, activity_id),
             "status": 202, "name": "User deleted from activity", "method": "DELETE", "timestamp": timestamp}}
         return resp, 202
 
