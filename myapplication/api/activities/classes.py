@@ -91,11 +91,10 @@ class ActivityApi(Resource):
         dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
         for obj in activity:
-            for obj in activity:
-                dictionary['activities'].append(
-                    {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
-                     'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
-                     'last_name': obj[7], 'email': obj[8]})
+            dictionary['activities'].append(
+                {"date": obj[0], 'type_of_classes': obj[1], 'city': obj[2], 'street': obj[3],
+                 'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
+                 'last_name': obj[7], 'email': obj[8]})
 
         #dictionary['activities'] = sorted(dictionary['activities'], key = lambda i: i['date'], reverse=False)
         #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
@@ -146,7 +145,7 @@ class UserActivityApi(Resource):
                                     timestamp}}
             return err_resp, 400
 
-        cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=\'%d\'" % class_id
+        cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.class_id=%d" % class_id
         number_of_users = db.session.execute(cmd).cursor.fetchone()
 
         if number_of_users is None:
@@ -161,7 +160,7 @@ class UserActivityApi(Resource):
                                     "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "SELECT user_id FROM fit.participation WHERE user_id=\'%s\' AND class_id=\'%s\'" %  (current_user.id, class_id)
+        cmd = "SELECT user_id FROM fit.participation WHERE user_id=%d AND class_id=%d" %  (current_user.id, class_id)
         res = db.session.execute(cmd).cursor.fetchone()
         if res is not None:
             err_resp = {"message": {
@@ -188,13 +187,13 @@ class UserActivityApi(Resource):
                 "status": 400, "name": "cannot delete", "method": "DELETE", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND class_id=%d" % current_user.id, class_id
+        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND class_id=%d" % (current_user.id, class_id)
         db.session.execute(cmd)
         db.session.commit()
 
         resp = {"message": {
             "description": "User properly signed off the activity user's email: {} and class_id: {}".format(current_user.email, class_id),
-            "status": 202, "name": "User deleted from activity", "method": "POST", "timestamp": timestamp}}
+            "status": 202, "name": "User deleted from activity", "method": "DELETE", "timestamp": timestamp}}
         return resp, 202
 
 

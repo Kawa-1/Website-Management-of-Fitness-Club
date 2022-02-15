@@ -3,7 +3,7 @@ from flask import json, request
 from datetime import datetime, timedelta
 from myapplication.models import Users
 from myapplication import db
-from myapplication.api.auth.auth import check_email
+from myapplication.api.auth.auth import check_email, token_required
 
 timestamp = str(datetime.utcnow())
 
@@ -32,8 +32,8 @@ class InstructorsApi(Resource):
                     "timestamp": timestamp}}
                 return err_resp, 400
 
-        cmd = """SELECT u.first_name, u.last_name, u.email, FROM fit.users u \
-                            WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % offset, limit
+        cmd = """SELECT u.first_name, u.last_name, u.email, FROM fit.users u\
+                            WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
         instructors = db.session.execute(cmd).fetchall()
 
         if len(instructors) == 0:
@@ -92,7 +92,7 @@ class InstructorsApi(Resource):
                     INNER JOIN fit.classes c ON u.id=c.instructor_id
                     INNER JOIN fit.facilities f ON f.id=c.facility_id
                     WHERE u.email=\'%s\' AND u.is_instructor=1
-                    ORDER BY c.date DESC OFFSET %d LIMIT %d""" % email, offset, limit
+                    ORDER BY c.date DESC OFFSET %d LIMIT %d""" % (email, offset, limit)
 
         instructors_activities = db.session.execute(cmd).cursor.fetchall()
 
@@ -120,5 +120,20 @@ class InstructorsApi(Resource):
                  "type_of_classes": instructor[10]})
 
         return resp, 200
+
+    @token_required
+    def put(self, current_user=None):
+        if current_user.is_instructor != 1:
+            err_resp = {
+                "message": {"description": "This user ain't instructor!", "name": "Forbidden method for this kind of users\
+                                                                                  who are not instructors",
+                            "status": 403, "method": "PUT", "timestamp": timestamp}}
+            return err_resp, 403
+        # TODO: continue creating activities
+        pass
+
+
+
+
 
 

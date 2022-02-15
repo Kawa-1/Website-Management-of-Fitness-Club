@@ -65,8 +65,10 @@ class PriceList(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    service = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Integer, nullable=False)
+
+    service_id = db.Column(db.Integer, db.ForeignKey('fit.service_names.id'))
+
 
 
 class Subscriptions(db.Model):
@@ -74,10 +76,10 @@ class Subscriptions(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    service = db.Column(db.String(100), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
 
+    service_id = db.Column(db.Integer, db.ForeignKey('fit.service_names.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     facility_id = db.Column(db.Integer, db.ForeignKey('fit.facilities.id'))
     price_id = db.Column(db.Integer, db.ForeignKey('fit.price_list.id'))
@@ -89,9 +91,9 @@ class Classes(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String, nullable=False, default=datetime.utcnow().strftime("%Y-%m-%d %H-%M"))
-    type_of_classes = db.Column(db.String(100), nullable=False)
 
     #instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
+    type_of_classes_id = db.Column(db.Integer, db.ForeignKey('fit.types_of_activities.id'))
     instructor_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     facility_id = db.Column(db.Integer, db.ForeignKey('fit.facilities.id'))
     price_id = db.Column(db.Integer, db.ForeignKey('fit.price_list.id'))
@@ -105,6 +107,27 @@ class Participation(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
     class_id = db.Column(db.Integer, db.ForeignKey('fit.classes.id'))
+
+
+class TypesOfActivities(db.Model):
+    __tablename__ = 'types_of_activities'
+    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
+
+    id = db.Column(db.Integer, primary_key=True)
+    name_of_activity = db.Column(db.String(100), nullable=False)
+
+    activity_name = db.relationship('Classes', backref='activity_name', lazy=True)
+
+
+class ServiceNames(db.Model):
+    __tablename__ = 'service_names'
+    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
+
+    id = db.Column(db.Integer, primary_key=True)
+    service = db.Column(db.String(100), nullable=False)
+
+    service_name_price = db.relationship('PriceList', backref='service_name_price', lazy=True)
+    service_name_subscription = db.relationship('Subscriptions', backref='service_name_subscriptions', lazy=True)
 
 
 class BlackListToken(db.Model):
@@ -139,11 +162,11 @@ class BlackListToken(db.Model):
         else:
             return False
 
-class Test(db.Model):
-    __tablename__ = 'participation'
-    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(500), nullable=False)
-    email = db.Column(db.String(500), unique=True, nullable=False)
+#class Test(db.Model):
+#    __tablename__ = 'participation'
+#    __table_args__ = {'extend_existing': True, 'schema': 'fit'}
+#
+#    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#    name = db.Column(db.String(500), nullable=False)
+#    email = db.Column(db.String(500), unique=True, nullable=False)
 #db.create_all()
