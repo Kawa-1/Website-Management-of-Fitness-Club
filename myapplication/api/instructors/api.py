@@ -7,7 +7,7 @@ from myapplication.api.auth.auth import check_email
 
 timestamp = str(datetime.utcnow())
 
-class InstructorsApi:
+class InstructorsApi(Resource):
     def get(self, limit=5, offset=0):
         limit_ = request.args.get("limit")
         offset_ = request.args.get("offset")
@@ -20,7 +20,6 @@ class InstructorsApi:
                     "description": "Argument limit must be int",
                     "status": 400, "name": "invalid format of parameter limit", "method": "GET",
                     "timestamp": timestamp}}
-                err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
                 return err_resp, 400
 
         if offset_ is not None:

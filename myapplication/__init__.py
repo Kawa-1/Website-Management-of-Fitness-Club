@@ -74,6 +74,9 @@ def create_app():
     from myapplication.api.activities.classes import ActivityApi
     api.add_resource(ActivityApi, "/api/activity_api/<string:date>", "/api/activity_api")
 
+    from myapplication.api.instructors.api import InstructorsApi
+    api.add_resource(InstructorsApi, "/api/instructors")
+
     from myapplication.api.auth.api import Test
     api.add_resource(Test, "/test")
 
