@@ -38,7 +38,7 @@ export class AuthService {
 
   logout(token:MyToken): Promise<any> {
     let url: string = this.path + "/logout";
-    return this.http.post(url, token, {headers: this.headers}).toPromise();
+    return this.http.post(url, token).toPromise();
   }
 
   register(form:FormData) {

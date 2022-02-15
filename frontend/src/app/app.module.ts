@@ -53,6 +53,14 @@ import { ActivitiesComponent } from './activities/activities.component';
         component: RegisterComponent
       },
       {
+        path: 'activities', 
+        component: ActivitiesComponent
+      },
+      {
+        path: 'yourprofile', 
+        component: YourProfileComponent
+      },
+      {
         path: '**', 
         component: NotFoundComponent
       }
