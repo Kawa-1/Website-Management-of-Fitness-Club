@@ -49,6 +49,7 @@ def token_required(f):
 		except Exception as e:
 			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
 									'timestamp': timestamp}}
+			print('error 53', e)
 			return err_resp, 401
 
 		return f(current_user, *args, **kwargs)
