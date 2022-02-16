@@ -56,7 +56,7 @@ class StartSubscription(Resource):
             return err_resp, 400
 
 
-        cmd = """SELECT * FROM fit.types_of_services WHERE id=%d and is_subscription=1""" % service_id
+        cmd = """SELECT name_of_service FROM fit.types_of_services WHERE id=%d and is_subscription=1""" % service_id
         type_of_pass = db.session.execute(cmd).cursor.fetchone()
         # TODO: check if this values exist in db
 
@@ -75,6 +75,7 @@ class StartSubscription(Resource):
         # datetime.datetime object
         start_date = string_to_datetime(start_date)
         type_of_pass = type_of_pass[0]
+        print(type_of_pass)
         if type_of_pass == "pass_1d":
             start_date = datetime_to_string(start_date)
             end_date = start_date
@@ -83,7 +84,7 @@ class StartSubscription(Resource):
             db.session.add(sub)
             db.session.commit()
             resp = {"message": {
-                "description": "User mad subscription from {} to {}".format(start_date, end_date),
+                "description": "User made subscription from {} to {}".format(start_date, end_date),
                 "status": 201, "name": "Subscription made for 1day", "method": "POST",
                 "timestamp": timestamp}}
             return resp, 201
