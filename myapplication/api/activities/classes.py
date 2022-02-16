@@ -115,7 +115,7 @@ class UserActivityApi(Resource):
                     INNER JOIN fit.facilities f ON a.facility_id=f.id 
                     INNER JOIN fit.participation p ON p.activity_id=a.id
                     INNER JOIN fit.price_list pr ON pr.id=a.price_id
-                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
+                    INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id
                     WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id)
                     GROUP BY a.id 
                     ORDER BY a.date DESC;""" % user_id
