@@ -43,7 +43,7 @@ class ActivityApi(Resource):
                     INNER JOIN fit.facilities f ON a.facility_id=f.id
                     INNER JOIN fit.price_list p ON a.price_id=p.id
                     INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=a.instructor_id
-                    INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id
+                    INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
                     ORDER BY a.date DESC 
                     LIMIT %d""" % limit
             activity = db.session.execute(cmd).cursor.fetchall()
@@ -77,7 +77,7 @@ class ActivityApi(Resource):
               INNER JOIN fit.facilities f ON a.facility_id=f.id
               INNER JOIN fit.price_list p ON a.price_id=p.id
               INNER JOIN fit.users u ON u.instructor.id=1 AND u.id=a.instructor_id
-              INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id
+              INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
               WHERE a.date~*\'^%s.*\'
               ORDER BY a.date DESC
               LIMIT %d """  % (date, limit)
@@ -115,7 +115,7 @@ class UserActivityApi(Resource):
                     INNER JOIN fit.facilities f ON a.facility_id=f.id 
                     INNER JOIN fit.participation p ON p.activity_id=a.id
                     INNER JOIN fit.price_list pr ON pr.id=a.price_id
-                    INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id
+                    INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
                     WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id)
                     GROUP BY a.id 
                     ORDER BY a.date DESC;""" % user_id
