@@ -206,13 +206,11 @@ class LoginUserApi(Resource):
         if not user or not check_password_hash(user.password, password):
             err_resp = {"message": {"description": "Such user doesn't exist or password is incorrect",
                                     "name": "Could not log into", "method": "POST", "status": 400, "timestamp": timestamp}}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
         if user.confirmed == 0:
             err_resp = {"message": {"description": "This account has not been confirmed yet",
                                     "name": "Could not log into", "method": "POST", "status": 400}, "timestamp": timestamp}
-            err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
             return err_resp, 400
 
 

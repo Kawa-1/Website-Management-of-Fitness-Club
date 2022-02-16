@@ -18,6 +18,7 @@ def token_required(f):
 			auth_value = request.headers['Authorization']
 			try:
 				token = auth_value.split(" ")[1]
+				print("token ", token)
 				if BlackListToken.check_blacklist(token):
 					err_resp = {
 						"message": {"description": "Token already blacklisted",
@@ -37,7 +38,8 @@ def token_required(f):
 			return err_resp, 401
 
 		try:
-			data = jwt.decode(token, current_app.config['SECRET_KEY'])
+			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithm="HS256")
+			print("decoded ", data)
 			current_user = Users.query.filter_by(id=data['id']).first()
 			if current_user is None:
 				err_resp = {
@@ -48,6 +50,7 @@ def token_required(f):
 		except Exception as e:
 			err_resp = {"message": {"description": "token is invalid", "status": 401, "name": "Active token required",
 									'timestamp': timestamp}}
+			print('error 53', e)
 			return err_resp, 401
 
 		return f(current_user, *args, **kwargs)
