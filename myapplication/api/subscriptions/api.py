@@ -56,7 +56,7 @@ class StartSubscription(Resource):
             return err_resp, 400
 
         cmd = """SELECT * FROM fit.types_of_services WHERE service_id=%d and is_subscription=1""" % service_id
-        type_of_pass = db.session.execute('cmd').cursor.fetchone()
+        type_of_pass = db.session.execute(cmd).cursor.fetchone()
         # TODO: check if this values exist in db
 
         cmd = """SELECT id, (SELECT id FROM fit.facilities WHERE id=%d), (SELECT id FROM fit.price_list WHERE id=%d), 
