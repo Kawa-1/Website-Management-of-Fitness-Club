@@ -55,6 +55,7 @@ class StartSubscription(Resource):
                 "timestamp": timestamp}}
             return err_resp, 400
 
+
         cmd = """SELECT * FROM fit.types_of_services WHERE id=%d and is_subscription=1""" % service_id
         type_of_pass = db.session.execute(cmd).cursor.fetchone()
         # TODO: check if this values exist in db

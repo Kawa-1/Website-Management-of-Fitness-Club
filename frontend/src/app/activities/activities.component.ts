@@ -30,19 +30,19 @@ export class ActivitiesComponent implements OnInit {
   public activities$: any = [];
   public user_id:any;
   public usersUsername:any = "";
-
+  public test: any;
       
-  form = new FormGroup({  
-    website: new FormControl('', Validators.required)  
-  });  
-    
-  get f(){  
-    return this.form.controls;  
-  }  
-    
-  submit(){  
-    console.log(this.form.value);  
-  }  
+  form1 = new FormGroup({  
+    instructor: new FormControl('', Validators.required)  
+  }); 
+
+  form2 = new FormGroup({  
+    activity: new FormControl('', Validators.required)  
+  });
+
+  form3 = new FormGroup({  
+    facility: new FormControl('', Validators.required)  
+  });
 
   constructor(
     private auth: AuthService,
@@ -89,7 +89,6 @@ export class ActivitiesComponent implements OnInit {
         this.facilities$ = data.facilities;
       }
     )
-
     this.auth.getTypesActivities().then(
       data => {
         this.activities$ = data.activities;
@@ -98,7 +97,19 @@ export class ActivitiesComponent implements OnInit {
   }
 
   addActivity(): void{
-    console.log(this.datePick)
+    console.log(this.datePick);
+    console.log(this.form1.value.instructor)
+    console.log(this.form2.value.activity)
+    console.log(this.form3.value.facility)
+
+    var array = this.form2.value.activity.split('.');
+    array[1] = array[1].substring(1);
+
+    this.auth.getPrice(array[0]).then(
+      data=>{
+        console.log(data)
+      }
+    )
   }
 
   goBack(): void {
