@@ -230,6 +230,7 @@ class LogoutUserApi(Resource):
     @token_required
     def post(self):
         auth_token = request.headers.get('Authorization').split(" ")[1]
+        print('logout: ', auth_token)
 
         #email_user = g.user.email
 

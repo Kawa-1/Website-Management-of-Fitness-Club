@@ -14,6 +14,7 @@ def token_required(f):
 	def decorator(*args, **kwargs):
 		token = None
 
+		print(request.headers)
 		if 'Authorization' in request.headers:
 			auth_value = request.headers['Authorization']
 			print(auth_value)
@@ -44,7 +45,7 @@ def token_required(f):
 			g.user = Users.query.filter_by(id=data['id']).first()
 			if g.user is None:
 				err_resp = {
-					"message": {"description": "Such user doesn't exist", "status": 401, "name": "Cannot auth; token required",
+					"message": {"description": "Such user doesn't exist", "status": 404, "name": "Cannot auth; token required",
 								'timestamp': timestamp}}
 				return err_resp, 404
 
