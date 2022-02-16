@@ -18,7 +18,7 @@ def token_required(f):
 			auth_value = request.headers['Authorization']
 			try:
 				token = auth_value.split(" ")[1]
-				if not BlackListToken.check_blacklist(token):
+				if BlackListToken.check_blacklist(token):
 					err_resp = {
 						"message": {"description": "Token already blacklisted",
 									"name": "Token already blacklisted",

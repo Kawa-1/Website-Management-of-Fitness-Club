@@ -98,6 +98,7 @@ class TypesOfServices(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name_of_service = db.Column(db.String(100), nullable=False)
+    is_subscription = db.Column(db.Integer, nullable=False, default=0)
 
     service_name = db.relationship('Activities', backref='activity_name', lazy=True)
     service_name_price = db.relationship('PriceList', backref='service_name_price', lazy=True)
