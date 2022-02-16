@@ -32,7 +32,7 @@ class UserApi(Resource):
 
     #@marshal_with(user_fields)
     @token_required
-    def get(self, current_user):
+    def get(self, current_user=None):
         resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
                             "timestamp": timestamp},
                 "user": {"first_name": current_user.first_name, "last_name": current_user.last_name, "city": current_user.city,
