@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import json, request
 from datetime import datetime, timedelta
-from myapplication.models import Users
+from myapplication.models import Users, Activities
 from myapplication import db
 from myapplication.api.auth.auth import check_email, token_required
 
@@ -135,6 +135,31 @@ class InstructorsApi(Resource):
         instructor_id = current_user.id
         facility_id = request.form.get('facility_id')
         price_id = request.form.get('price_id')
+
+        new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=current_user.id,
+                                  facility_id=facility_id, price_id=price_id)
+
+        db.session.add(new_activity)
+        db.session.commit()
+
+        cmd = """SELECT name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
+                (SELECT city FROM fit.facilities WHERE %d=id), (SELECT price FROM fit.price_list WHERE %d=id)
+                FROM fit.types_of_services WHERE %d=id""" % (current_user.id, facility_id, price_id, type_of_service_id)
+        res = db.session.execute(cmd).cursor.fetchone()
+
+        if res[0] is None or res[2] is None or res[3] is None:
+            err_resp = {
+                "message": {"description": "Such price, facility, or/and type_of_service doesn't/don't exist!",
+                            "name": "Trying to add new activity",
+                            "status": 404, "method": "PUT", "timestamp": timestamp}}
+            return err_resp, 404
+
+        resp = {"message": {"description": "New activity has been created!",
+                            "name": "Activity added",
+                            "status": 201, "method": "POST", "timestamp": timestamp},
+                "activity": {"date": date, "name_of_service": res[0], "email_instructor": res[1], "city": res[2],
+                             "price": res[3]}}
+        return resp, 201
 
 
 
