@@ -91,7 +91,7 @@ def create_app():
     api.add_resource(StartSubscription, "/api/start_subscription")
 
     from myapplication.api.price_list.api import PriceOnService
-    api.add_resource(PriceOnService, "/api/price_on_service/<int:service_id", "/api/price_on_service")
+    api.add_resource(PriceOnService, "/api/price_on_service/<int:service_id>", "/api/price_on_service")
 
     from myapplication.api.auth.api import Test
     api.add_resource(Test, "/test")
