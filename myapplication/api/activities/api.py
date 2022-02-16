@@ -66,7 +66,6 @@ class ActivityApi(Resource):
 
         err_resp = {"errors": [{"description": "Provided bad format of date",
                                 "method": "GET", "name": "Failed obtaining activities", "status": 400, "timestamp": timestamp}]}
-        err_resp = json.dumps(err_resp, indent=4, sort_keys=True)
 
         date = date.replace("_", "-")
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
