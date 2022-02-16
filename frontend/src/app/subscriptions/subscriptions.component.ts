@@ -11,7 +11,7 @@ export class SubscriptionsComponent implements OnInit {
   constructor( private auth: AuthService ) { }
 
   ngOnInit(): void {
-    this.auth.getSubscriptions()
+    this.auth.getTypesSubscriptions()
     .then((data) => {
         console.log(data)
     })

@@ -60,13 +60,18 @@ export class AuthService {
     return this.http.get(url).toPromise();
   }
 
-  getActivities(): Promise<any>{
-    let url: string = this.path + "/activity_api";
+  getTypesActivities(): Promise<any>{
+    let url: string = this.path + "/activity_services";
     return this.http.get(url).toPromise();
   }
 
-  getSubscriptions(): Promise<any>{
+  getTypesSubscriptions(): Promise<any>{
     let url: string = this.path + "/subscription_services";
+    return this.http.get(url).toPromise();
+  }
+
+  getActivities(): Promise<any>{
+    let url: string = this.path + "/activity_api";
     return this.http.get(url).toPromise();
   }
 }

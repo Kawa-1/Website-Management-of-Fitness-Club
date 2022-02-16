@@ -2,6 +2,8 @@ import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { AuthService } from '../services/auth.service';
 import { FormGroup, FormControl, Validators} from '@angular/forms'; 
+import { CookieService } from 'ngx-cookie-service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-activities',
@@ -16,6 +18,8 @@ export class ActivitiesComponent implements OnInit {
     this.datepicker?.hide();
   }
 
+  public isLoggedIn: boolean = false;
+  public isInstructor: boolean = false;
   public isDisabled = true;
   public openForm: boolean = true;
   public datePick = new Date();
@@ -24,6 +28,9 @@ export class ActivitiesComponent implements OnInit {
   public instructors$: any = [];
   public facilities$: any = [];
   public activities$: any = [];
+  public user_id:any;
+  public usersUsername:any = "";
+
       
   form = new FormGroup({  
     website: new FormControl('', Validators.required)  
@@ -39,30 +46,33 @@ export class ActivitiesComponent implements OnInit {
 
   constructor(
     private auth: AuthService,
+    private cookieService: CookieService, 
+    private toastr: ToastrService
   ){
   }
 
   ngOnInit(): void {
-    // const token = this.cookieService.get('token');
-    // this.tokenInClass = token;
-    // if (token){
-    //   this.auth.ensureAuthenticated(token)
-    //   .then((user) => {
-    //     if (user.status === 'success') {
-    //       this.user_id = user.data.user_id;
-    //       this.username = user.data.username;
-    //       this.openForm = false;
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     this.toastr.error('Log in to add opinions');
-    //     this.openForm = true;
-    //   });
-    // }
-    // else{
-    //   this.toastr.error('Log in to add opinions');
-    //   this.openForm = true;
-    // }
+    const token = this.cookieService.get('token');
+    if (token){
+      this.auth.ensureAuthenticated(token)
+      .then((user) => {
+        console.log(user)
+        if (user.message.status === 200) {
+          this.isLoggedIn = true;
+          this.usersUsername = user.user.first_name;
+          this.user_id = user.user.user_id;
+          if (user.user.is_instructor === 1){
+            this.isInstructor = true
+          }
+        }
+      })
+      .catch((err) => {
+        this.openForm = true;
+      });
+    }
+    else{
+      this.openForm = true;
+    }
   }
 
   openAdd(): void{
@@ -80,10 +90,9 @@ export class ActivitiesComponent implements OnInit {
       }
     )
 
-    this.auth.getActivities().then(
+    this.auth.getTypesActivities().then(
       data => {
         this.activities$ = data.activities;
-        console.log(data)
       }
     )
   }
