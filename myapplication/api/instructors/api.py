@@ -32,7 +32,7 @@ class InstructorsApi(Resource):
                     "timestamp": timestamp}}
                 return err_resp, 400
 
-        cmd = """SELECT u.first_name, u.last_name, u.email FROM fit.users u WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
+        cmd = """SELECT u.id, u.first_name, u.last_name, u.email FROM fit.users u WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
         instructors = db.session.execute(cmd).fetchall()
 
         if len(instructors) == 0:
@@ -46,7 +46,7 @@ class InstructorsApi(Resource):
                 "instructors": []}
 
         for instructor in instructors:
-            resp["instructors"].append({"first_name": instructor[0], "last_name": instructor[1], "email": instructor[2]})
+            resp["instructors"].append({"id": instructor[0], "first_name": instructor[1], "last_name": instructor[2], "email": instructor[3]})
 
         return resp, 200
 
@@ -129,8 +129,8 @@ class InstructorsApi(Resource):
                                                                                   who are not instructors",
                             "status": 403, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 403
-        # TODO: continue creating activities
-        pass
+
+
 
 
 
