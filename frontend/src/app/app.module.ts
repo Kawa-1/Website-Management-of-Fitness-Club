@@ -9,6 +9,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { TimepickerModule } from 'ngx-bootstrap/timepicker';
+
 
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
@@ -18,6 +20,7 @@ import { RecaptchaComponent } from './recaptcha/recaptcha.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { YourProfileComponent } from './your-profile/your-profile.component';
 import { ActivitiesComponent } from './activities/activities.component';
+import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +33,7 @@ import { ActivitiesComponent } from './activities/activities.component';
     NavbarComponent,
     YourProfileComponent,
     ActivitiesComponent,
+    SubscriptionsComponent,
   ],
   imports: [
     BsDatepickerModule.forRoot(),
@@ -70,6 +74,7 @@ import { ActivitiesComponent } from './activities/activities.component';
       timeOut:2000,
       preventDuplicates: true
     }),
+    TimepickerModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -50,4 +50,14 @@ export class AuthService {
     let url: string = this.path + "/instructors";
     return this.http.get(url).toPromise();
   }
+
+  getFacilities(): Promise<any>{
+    let url: string = this.path + "/facilities";
+    return this.http.get(url).toPromise();
+  }
+
+  getActivities(): Promise<any>{
+    let url: string = this.path + "/activity_api";
+    return this.http.get(url).toPromise();
+  }
 }
