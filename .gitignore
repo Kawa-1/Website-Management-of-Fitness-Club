@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 server.log
 frontend/node_modules/
+*.rar

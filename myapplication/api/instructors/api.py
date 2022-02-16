@@ -86,11 +86,11 @@ class InstructorsApi(Resource):
             return err_resp, 400
 
         cmd = """SELECT u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, f.postcode, f.contact_number,
-                    f.email, a.date, t.name_of_activity 
+                    f.email, a.date, t.name_of_service
                     FROM fit.users u
                     INNER JOIN fit.activities a ON u.id=a.instructor_id
                     INNER JOIN fit.facilities f ON f.id=a.facility_id
-                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
                     WHERE u.email=\'%s\' AND u.is_instructor=1
                     ORDER BY a.date DESC OFFSET %d LIMIT %d""" % (email, offset, limit)
 
@@ -117,7 +117,7 @@ class InstructorsApi(Resource):
             resp["activities"].append(
                 {"city": instructor[3], "street": instructor[4], "house_number": instructor[5], "postcode": instructor[6],
                  "contact_number": instructor[7], "email_facility": instructor[8], "date": instructor[9],
-                 "type_of_activity": instructor[10]})
+                 "type_of_service": instructor[10]})
 
         return resp, 200
 
@@ -130,6 +130,11 @@ class InstructorsApi(Resource):
                             "status": 403, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 403
 
+        date = request.form.get('date')
+        type_of_service_id = request.form.get('type_of_service_id')
+        instructor_id = current_user.id
+        facility_id = request.form.get('facility_id')
+        price_id = request.form.get('price_id')
 
 
 
