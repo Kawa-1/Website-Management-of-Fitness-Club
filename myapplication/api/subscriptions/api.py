@@ -63,7 +63,7 @@ class StartSubscription(Resource):
         cmd = """SELECT id, (SELECT id FROM fit.facilities WHERE id=%d), (SELECT id FROM fit.price_list WHERE id=%d), 
         (SELECT id FROM fit.users WHERE id=%id) FROM fit.types_of_services WHERE id=%d""" % (facility_id, price_id,
                                                                                              user_id, service_id)
-        res = db.session.excute(cmd).cursor.fetchall()
+        res = db.session.execute(cmd).cursor.fetchall()
 
         if res[0] is None or res[1] is None or res[2] is None or res[3] is None:
             err_resp = {"message": {
