@@ -43,7 +43,11 @@ export class AuthService {
 
   register(form:FormData) {
     let url: string = this.path + "/register";
-    return  this.http.post(url, form)
+    return this.http.post(url, form)
   }
 
+  getInstructors(){
+    let url: string = this.path + "/instructors";
+    return this.http.get(url)
+  }
 }
