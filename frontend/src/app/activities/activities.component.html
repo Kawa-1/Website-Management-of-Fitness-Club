@@ -28,14 +28,29 @@
         
         <div class="form-group">  
             <label for="website">Website:</label>  
-            <select formControlName="website" class="form-control">  
-                <option>Choose Website</option>  
+            <select class="form-control">  
+                <option>Choose instructor</option>  
                 <option *ngFor="let instructor of instructors$"> {{instructor.first_name}} {{instructor.last_name}}</option>  
             </select>  
-            <div *ngIf="f.website.touched && f.website.invalid" class="alert alert-danger">  
-                <!-- <div *ngIf="f.website.errors.required">Name is required.</div>   -->
-            </div>  
-        </div>  
+            <!-- <div *ngIf="f.instructor.touched && f.instructor.invalid" class="alert alert-danger">  
+                <div *ngIf="f.website.errors.required">Name is required.</div>  
+            </div>   -->
+        </div>
+        <br>
+    
+        <timepicker [(ngModel)]="datePick"></timepicker>
+
+        <div class="form-group">  
+            <label for="website">Website:</label>  
+            <select class="form-control">  
+                <option>Choose activity</option>  
+                <option *ngFor="let activity of activities$"> {{activity.name_of_service}} </option>  
+            </select>  
+            <!-- <div *ngIf="f.facilitie.touched && f.facilitie.invalid" class="alert alert-danger">  
+                <div *ngIf="f.website.errors.required">Name is required.</div>  
+            </div>   -->
+        </div>
+        <br>
 
         <!-- <div class="form-group">
             <input required ngModel name="name" #name="ngModel" type="text" id="name" class="form-control" placeholder="Name" >

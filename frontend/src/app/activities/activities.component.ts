@@ -23,6 +23,8 @@ export class ActivitiesComponent implements OnInit {
   public minDate = new Date();
   public maxDate = new Date();
   public instructors$: any = [];
+  public facilities$: any = [];
+  public activities$: any = [];
       
   form = new FormGroup({  
     website: new FormControl('', Validators.required)  
@@ -42,12 +44,6 @@ export class ActivitiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.maxDate.setDate( this.maxDate.getDate() + 90 );
-    this.auth.getInstructors().then(
-      data => {
-        this.instructors$ = data.instructors;
-      }
-    )
     // const token = this.cookieService.get('token');
     // this.tokenInClass = token;
     // if (token){
@@ -72,6 +68,25 @@ export class ActivitiesComponent implements OnInit {
 
   openAdd(): void{
     this.openForm = false;
+
+    this.maxDate.setDate( this.maxDate.getDate() + 90 );
+    this.auth.getInstructors().then(
+      data => {
+        this.instructors$ = data.instructors;
+      }
+    )
+    this.auth.getFacilities().then(
+      data => {
+        this.facilities$ = data.facilities;
+      }
+    )
+
+    this.auth.getActivities().then(
+      data => {
+        this.activities$ = data.activities;
+        console.log(data)
+      }
+    )
   }
 
   addActivity(): void{
