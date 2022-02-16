@@ -105,8 +105,6 @@ def create_app():
                 response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
         return response
 
-<<<<<<< Updated upstream
-=======
     # @app.before_first_request
     # def service_names_activities_names(TypesOfActivities=TypesOfActivities, ServiceNames=ServiceNames):
     #     yoga = TypesOfActivities(name_of_activity='yoga')
@@ -158,7 +156,6 @@ def create_app():
 
 
 
->>>>>>> Stashed changes
     @app.route('/', methods=['GET'])
     def hello():
         arguments = request.args.get("username")

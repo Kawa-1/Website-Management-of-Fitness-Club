@@ -1,7 +1,8 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { AuthService } from '../services/auth.service';
-import { Instructor } from '../models/instructor'
+import { Instructor } from '../models/instructor';
+import { FormGroup, FormControl, Validators} from '@angular/forms'; 
 
 @Component({
   selector: 'app-activities',
@@ -21,8 +22,20 @@ export class ActivitiesComponent implements OnInit {
   public datePick = new Date();
   public minDate = new Date();
   public maxDate = new Date();
-  public instructors: Instructor[] = [];
-  
+  public instructors$: any = [];
+      
+  form = new FormGroup({  
+    website: new FormControl('', Validators.required)  
+  });  
+    
+  get f(){  
+    return this.form.controls;  
+  }  
+    
+  submit(){  
+    console.log(this.form.value);  
+  }  
+
   constructor(
     private auth: AuthService,
   ){
@@ -30,9 +43,9 @@ export class ActivitiesComponent implements OnInit {
 
   ngOnInit(): void {
     this.maxDate.setDate( this.maxDate.getDate() + 90 );
-    this.auth.getInstructors().subscribe(
-      data=>{
-        console.log(data)
+    this.auth.getInstructors().then(
+      data => {
+        this.instructors$ = data.instructors;
       }
     )
     // const token = this.cookieService.get('token');

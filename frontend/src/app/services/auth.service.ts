@@ -46,8 +46,8 @@ export class AuthService {
     return this.http.post(url, form)
   }
 
-  getInstructors(){
+  getInstructors(): Promise<any>{
     let url: string = this.path + "/instructors";
-    return this.http.get(url)
+    return this.http.get(url).toPromise();
   }
 }

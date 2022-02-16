@@ -24,16 +24,18 @@
                 [maxDate]="maxDate" 
                 [daysDisabled]="[0]">
         </div>
-
-        <!-- <mat-select placeholder="Select category">
-
-            <ng-container *ngFor="let category of (courseCategories | async)">
-
-                <mat-option></mat-option>
-
-            </ng-container>
-
-        </mat-select> -->
+        <br>
+        
+        <div class="form-group">  
+            <label for="website">Website:</label>  
+            <select formControlName="website" class="form-control">  
+                <option>Choose Website</option>  
+                <option *ngFor="let instructor of instructors$"> {{instructor.first_name}} {{instructor.last_name}}</option>  
+            </select>  
+            <div *ngIf="f.website.touched && f.website.invalid" class="alert alert-danger">  
+                <!-- <div *ngIf="f.website.errors.required">Name is required.</div>   -->
+            </div>  
+        </div>  
 
         <!-- <div class="form-group">
             <input required ngModel name="name" #name="ngModel" type="text" id="name" class="form-control" placeholder="Name" >
