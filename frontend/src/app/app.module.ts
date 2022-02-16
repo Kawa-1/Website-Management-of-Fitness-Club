@@ -8,7 +8,8 @@ import { AppComponent } from './app.component';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
-
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker'
 
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
@@ -32,6 +33,7 @@ import { ActivitiesComponent } from './activities/activities.component';
     ActivitiesComponent,
   ],
   imports: [
+    BsDatepickerModule.forRoot(),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -68,7 +70,7 @@ import { ActivitiesComponent } from './activities/activities.component';
     ToastrModule.forRoot({
       timeOut:2000,
       preventDuplicates: true
-    })
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent]

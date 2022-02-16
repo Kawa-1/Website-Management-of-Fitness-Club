@@ -1,1 +1,57 @@
-<p>activities works!</p>
+<div class="page-title">
+    <h2>Activities</h2>
+    <p class="lead">
+    </p>
+</div>
+
+<button class="btn btn-primary" id="add_opinion" (click)="openAdd()">Add an activity</button>
+
+<div class="form-stuff" [hidden]="openForm">
+    <form method="POST" #AddOpinionForm="ngForm" autocomplete="off">
+        <br><br>
+        <div class="form-group">
+            <label for="datePick">Date</label>
+            <input
+                id="datePick" 
+                name="datePick" 
+                bsDatepicker 
+                [(ngModel)]="datePick" 
+                type="text" 
+                class="form-control" 
+                #dp="bsDatepicker"
+                [bsConfig]="{ dateInputFormat: 'DD - MM - YYYY' }"
+                [minDate]="minDate"
+                [maxDate]="maxDate" 
+                [daysDisabled]="[0]">
+        </div>
+
+        <!-- <mat-select placeholder="Select category">
+
+            <ng-container *ngFor="let category of (courseCategories | async)">
+
+                <mat-option></mat-option>
+
+            </ng-container>
+
+        </mat-select> -->
+
+        <!-- <div class="form-group">
+            <input required ngModel name="name" #name="ngModel" type="text" id="name" class="form-control" placeholder="Name" >
+            <div class="alert alert-danger" *ngIf="name.touched && !name.valid">Name required</div>
+        </div>
+        <div class="form-group">
+            <input required ngModel name="city" #city="ngModel" type="text" id="city" class="form-control" placeholder="City" >
+            <div class="alert alert-danger" *ngIf="city.touched && !city.valid">Location required</div>
+        </div>
+        <div class="form-group">
+            <input required ngModel name="type" #type="ngModel" type="text" id="type" class="form-control" placeholder="Type" >
+            <div class="alert alert-danger" *ngIf="type.touched && !type.valid">Type required</div>
+        </div> -->
+        <!-- <button class="btn btn-primary" id="button1" (click)="getData(name.value, city.value, type.value, opinion.value)" [disabled]="!AddOpinionForm.valid || isDisabled">Add opinion</button> -->
+        <br>
+        <button class="btn btn-primary" id="button1" (click)="addActivity()">Add</button>
+        <br><br><br>
+        <button class="btn btn-primary" id="button2" (click)="goBack()">Go back</button>                        
+        <br>
+    </form>
+</div>
