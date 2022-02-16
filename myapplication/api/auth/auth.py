@@ -38,7 +38,7 @@ def token_required(f):
 			return err_resp, 401
 
 		try:
-			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithm="HS256")
+			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms="HS256")
 			print("decoded ", data)
 			current_user = Users.query.filter_by(id=data['id']).first()
 			if current_user is None:
