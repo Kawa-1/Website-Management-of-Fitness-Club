@@ -61,7 +61,7 @@ class StartSubscription(Resource):
         # TODO: check if this values exist in db
 
         cmd = """SELECT id, (SELECT id FROM fit.facilities WHERE id=%d), (SELECT id FROM fit.price_list WHERE id=%d), 
-        (SELECT id FROM fit.users WHERE id=%id) FROM fit.types_of_services WHERE id=%d""" % (facility_id, price_id,
+        (SELECT id FROM fit.users WHERE id=%d) FROM fit.types_of_services WHERE id=%d""" % (facility_id, price_id,
                                                                                              user_id, service_id)
         res = db.session.execute(cmd).cursor.fetchall()
 
@@ -71,7 +71,6 @@ class StartSubscription(Resource):
                 "status": 404, "name": "Subscription couldn't be done", "method": "POST",
                 "timestamp": timestamp}}
             return err_resp, 404
-
 
         # datetime.datetime object
         start_date = string_to_datetime(start_date)
