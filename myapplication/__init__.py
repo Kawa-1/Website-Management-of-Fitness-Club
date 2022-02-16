@@ -87,6 +87,9 @@ def create_app():
     from myapplication.api.types_of_services.api import ServiceSubscription
     api.add_resource(ServiceSubscription, "/api/subscription_services")
 
+    from myapplication.api.subscriptions.api import StartSubscription
+    api.add_resource(StartSubscription, "/api/start_subscription")
+
     from myapplication.api.auth.api import Test
     api.add_resource(Test, "/test")
 
