@@ -36,9 +36,13 @@ export class AuthService {
     return this.http.get(url, {headers: headers}).toPromise();
   }
 
-  logout(token:MyToken): Promise<any> {
+  logout(token:any): Promise<any> {
     let url: string = this.path + "/logout";
-    return this.http.post(url, token).toPromise();
+    let headers: HttpHeaders = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}` 
+    });
+    return this.http.post(url, {headers: headers}).toPromise();
   }
 
   register(form:FormData) {
@@ -58,6 +62,11 @@ export class AuthService {
 
   getActivities(): Promise<any>{
     let url: string = this.path + "/activity_api";
+    return this.http.get(url).toPromise();
+  }
+
+  getSubscriptions(): Promise<any>{
+    let url: string = this.path + "/subscription_services";
     return this.http.get(url).toPromise();
   }
 }

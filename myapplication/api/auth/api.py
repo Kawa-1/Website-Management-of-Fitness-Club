@@ -35,7 +35,7 @@ class UserApi(Resource):
     def get(self):
         resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
                             "timestamp": timestamp},
-                "user": {"first_name": g.user.first_name, "last_name": g.user.last_name, "city": g.user.city,
+                "user": {"id":g.user.id, "first_name": g.user.first_name, "last_name": g.user.last_name, "city": g.user.city,
                          "street": g.user.street, "house_number": g.user.house_number, "postcode": g.user.postcode,
                          "email": g.user.email, "is_instructor": g.user.is_instructor,
                          "created_at": str(g.user.created_at), "confirmed": g.user.confirmed}}

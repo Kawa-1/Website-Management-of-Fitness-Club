@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 export class YourProfileComponent implements OnInit {
   public isLoggedIn: boolean = false;
   public usersUsername:any = "elo";
-  public myToken: MyToken = new MyToken();
+  public myToken: any;
   public user_id:any;
 
 
@@ -25,14 +25,13 @@ export class YourProfileComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.cookieService.get('token');
-    console.log(token)
     if (token) {
       this.auth.ensureAuthenticated(token)
       .then((user) => {
-        if (user.status === 'success') {
+        if (user.message.status === 200) {
           this.isLoggedIn = true;
-          this.usersUsername = user.data.username;
-          this.user_id = user.data.user_id;
+          this.usersUsername = user.user.first_name;
+          this.user_id = user.user.user_id;
         }
       })
       .catch((err) => {
@@ -45,8 +44,9 @@ export class YourProfileComponent implements OnInit {
   }
 
   logout(){
-    this.myToken.token = this.cookieService.get('token');
+    this.myToken = this.cookieService.get('token');
     if (this.myToken) {
+      console.log(this.myToken)
       this.auth.logout(this.myToken)
       .then((data) => {
         if (data.status === 'success') {
