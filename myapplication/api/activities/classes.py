@@ -38,12 +38,12 @@ class ActivityApi(Resource):
                 return err_resp, 400
 
         if date is None:
-            cmd = """SELECT a.date, t.name_of_activity, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
+            cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
                     FROM fit.activities a
                     INNER JOIN fit.facilities f ON a.facility_id=f.id
                     INNER JOIN fit.price_list p ON a.price_id=p.id
                     INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=a.instructor_id
-                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
                     ORDER BY a.date DESC 
                     LIMIT %d""" % limit
             activity = db.session.execute(cmd).cursor.fetchall()
@@ -56,7 +56,7 @@ class ActivityApi(Resource):
             dictionary = {"activities": []}
             for obj in activity:
                 dictionary['activities'].append(
-                    {"date": obj[0], 'type_of_activity': obj[1], 'city': obj[2], 'street': obj[3],
+                    {"date": obj[0], 'type_of_service': obj[1], 'city': obj[2], 'street': obj[3],
                      'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
                      'last_name': obj[7], 'email': obj[8]})
 
@@ -72,12 +72,12 @@ class ActivityApi(Resource):
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
             return err_resp, 400
 
-        cmd = """SELECT a.date, t.name_of_activity, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
+        cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
               FROM fit.activities a 
               INNER JOIN fit.facilities f ON a.facility_id=f.id
               INNER JOIN fit.price_list p ON a.price_id=p.id
               INNER JOIN fit.users u ON u.instructor.id=1 AND u.id=a.instructor_id
-              INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+              INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
               WHERE a.date~*\'^%s.*\'
               ORDER BY a.date DESC
               LIMIT %d """  % (date, limit)
@@ -94,7 +94,7 @@ class ActivityApi(Resource):
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
         for obj in activity:
             dictionary['activities'].append(
-                {"date": obj[0], 'type_of_activity': obj[1], 'city': obj[2], 'street': obj[3],
+                {"date": obj[0], 'type_of_service': obj[1], 'city': obj[2], 'street': obj[3],
                  'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
                  'last_name': obj[7], 'email': obj[8]})
 
@@ -108,14 +108,14 @@ class UserActivityApi(Resource):
     def get(self, current_user=None):
         user_id = current_user.id
         # TODO: Get each activity in which particular user took part; DESC - 1st row will be the newest
-        cmd =  """SELECT t.name_of_activity, a.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
+        cmd =  """SELECT t.name_of_service, a.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
         (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=c.id GROUP BY c.id), c.id, pr.price, pr.service 
                     FROM fit.activities a 
                     INNER JOIN fit.users u ON a.instructor_id=u.id AND u.instructor_id=1 
                     INNER JOIN fit.facilities f ON a.facility_id=f.id 
                     INNER JOIN fit.participation p ON p.activity_id=a.id
                     INNER JOIN fit.price_list pr ON pr.id=a.price_id
-                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_activity_id
+                    INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
                     WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id)
                     GROUP BY a.id 
                     ORDER BY a.date DESC;""" % user_id
@@ -125,7 +125,7 @@ class UserActivityApi(Resource):
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
 
         for activity in classes_user_took:
-            dictionary['activities'].append({"type_of_activity": classes_user_took[0], "date": classes_user_took[1],
+            dictionary['activities'].append({"type_of_service": classes_user_took[0], "date": classes_user_took[1],
                                              "instructor_name": classes_user_took[2], "instructor_surname": classes_user_took[3],
                                              "instructor_email": classes_user_took[4], "fitness_city": classes_user_took[4],
                                              "fitness_street": classes_user_took[5], "fitness_house_number": classes_user_took[6],
