@@ -24,7 +24,7 @@ export class LoginComponent {
 
     this.auth.login(this.user)
     .then((user) => {
-      this.cookieService.set('token', user.token);
+      this.cookieService.set('token', user.message.token);
       this.toastr.success('Logged in succesfully');
     });
 

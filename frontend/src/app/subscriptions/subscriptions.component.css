@@ -1,0 +1,12 @@
+.show-stuff{
+    padding-right: 600px;
+    padding-left: 600px;
+    text-align: left;
+    font-size: 120%;
+}
+  
+.show-recipes{
+    height: 300px;
+    resize: none;
+    border: none;
+}

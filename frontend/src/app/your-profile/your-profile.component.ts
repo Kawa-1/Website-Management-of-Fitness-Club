@@ -14,6 +14,8 @@ export class YourProfileComponent implements OnInit {
   public isLoggedIn: boolean = false;
   public usersUsername:any = "elo";
   public myToken: MyToken = new MyToken();
+  public user_id:any;
+
 
   constructor(
     private auth: AuthService, 
@@ -22,6 +24,24 @@ export class YourProfileComponent implements OnInit {
   ){}
 
   ngOnInit(): void {
+    const token = this.cookieService.get('token');
+    console.log(token)
+    if (token) {
+      this.auth.ensureAuthenticated(token)
+      .then((user) => {
+        if (user.status === 'success') {
+          this.isLoggedIn = true;
+          this.usersUsername = user.data.username;
+          this.user_id = user.data.user_id;
+        }
+      })
+      .catch((err) => {
+        this.isLoggedIn = false;
+      });
+    }
+    else{
+      this.isLoggedIn = false;
+    }
   }
 
   logout(){

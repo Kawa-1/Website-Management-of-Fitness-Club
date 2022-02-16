@@ -1,7 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { AuthService } from '../services/auth.service';
-import { Instructor } from '../models/instructor';
 import { FormGroup, FormControl, Validators} from '@angular/forms'; 
 
 @Component({

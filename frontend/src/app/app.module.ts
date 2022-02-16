@@ -36,7 +36,6 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
     SubscriptionsComponent,
   ],
   imports: [
-    BsDatepickerModule.forRoot(),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -62,6 +61,10 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
         component: ActivitiesComponent
       },
       {
+        path: 'subscriptions', 
+        component: SubscriptionsComponent
+      },
+      {
         path: 'yourprofile', 
         component: YourProfileComponent
       },
@@ -75,6 +78,7 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
       preventDuplicates: true
     }),
     TimepickerModule.forRoot(),
+    BsDatepickerModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]
