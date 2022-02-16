@@ -27,29 +27,39 @@
         </div>
         <br>
         
-        <div class="form-group">  
-            <label for="website">Website:</label>  
-            <select class="form-control">  
-                <option>Choose instructor</option>  
-                <option *ngFor="let instructor of instructors$"> {{instructor.first_name}} {{instructor.last_name}}</option>  
-            </select>
-        </div>
+        <form [formGroup]="form1">  
+            <div class="form-group">  
+                <label for="instructor">Instructor:</label>  
+                <select formControlName="instructor" class="form-control">  
+                    <option>Choose Instructor</option>  
+                    <option *ngFor="let instructor of instructors$"> {{instructor.first_name}} {{instructor.last_name}}</option>  
+                </select>  
+            </div>  
+        </form>
         <br>
     
         <timepicker [(ngModel)]="datePick"></timepicker>
 
-        <div class="form-group">  
-            <label for="website">Website:</label>  
-            <select class="form-control">  
-                <option>Choose activity</option>  
-                <option *ngFor="let activity of activities$"> {{activity.name_of_service}} </option>  
-            </select>  
-
-        </div>
+        <form [formGroup]="form2">  
+            <div class="form-group">  
+                <label for="activity">Activity:</label>  
+                <select formControlName="activity" class="form-control">  
+                    <option>Choose activity</option>  
+                    <option *ngFor="let activity of activities$"> {{activity.id}}. {{activity.name_of_service}} </option>  
+                </select>  
+            </div>
+        </form>
         <br>
-
-
-        <br>
+        <form [formGroup]="form3">  
+            <div class="form-group">  
+                <label for="facility">Facility:</label>  
+                <select formControlName="facility" class="form-control">  
+                    <option>Choose facility</option>  
+                    <option *ngFor="let facility of facilities$"> {{facility.city}} </option>  
+                </select>  
+            </div>
+        </form>
+        <br><br>
         <button class="btn btn-primary" id="button1" (click)="addActivity()">Add</button>
         <br><br><br>
         <button class="btn btn-primary" id="button2" (click)="goBack()">Go back</button>                        

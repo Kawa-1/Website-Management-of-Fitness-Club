@@ -11,7 +11,7 @@ export class AuthInterceptor implements HttpInterceptor{
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>>{
 
-        if(req.url=="http://localhost:5000/api/logout"){
+        if(req.url=="http://localhost:5000/api/logout" || req.url=="http://localhost:5000/api/start_subscription"){
 
             let authToken = `Bearer ${this.cookieService.get('token')}`
             

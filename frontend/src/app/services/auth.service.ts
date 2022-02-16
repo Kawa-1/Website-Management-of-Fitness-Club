@@ -74,4 +74,14 @@ export class AuthService {
     let url: string = this.path + "/activity_api";
     return this.http.get(url).toPromise();
   }
+
+  getPrice(service_id: any): Promise<any>{
+    let url: string = this.path + `/price_on_service/${service_id}`;
+    return this.http.get(url).toPromise();
+  }
+
+  startSubscription(sub: any): Promise<any>{
+    let url: string = this.path + `/start_subscription`;
+    return this.http.post(url, sub).toPromise();
+  }
 }

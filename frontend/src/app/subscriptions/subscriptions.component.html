@@ -4,19 +4,106 @@
     </p>
 </div>
 
-<div class="show-stuff">
-    1 day subscription
+<div [hidden]="!gotData">
+    <div class="show-stuff">
+        <p style="font-size: 140%;">1 day subscription</p>
+        <p style="font-size: 120%;">Price: {{oneDayPrice}} $</p>
+        <br>
+        <div class="form-group">
+            <label for="datePick">Start date</label>
+            <input
+                id="datePick" 
+                name="datePick" 
+                bsDatepicker 
+                [(ngModel)]="datePick1" 
+                type="text" 
+                class="form-control" 
+                #dp="bsDatepicker"
+                [bsConfig]="{ dateInputFormat: 'DD - MM - YYYY' }"
+                [minDate]="minDate"
+                [maxDate]="maxDate" 
+                [daysDisabled]="[0]">
+        </div>
+        <br>
+        <form [formGroup]="form1">  
+            <div class="form-group">  
+                <label for="facility">Facility:</label>  
+                <select formControlName="facility" class="form-control">  
+                    <option>Choose facility</option>  
+                    <option *ngFor="let facility of facilities$">{{facility.id}}. {{facility.city}} </option>  
+                </select>  
+            </div>
+        </form>
+        <br>
+        <button class="btn btn-primary" id="button2" (click)="buy1()">Buy 1 day subscription</button>   
+        <br>
+    </div>
     <br>
-</div>
-<br>
 
-<div class="show-stuff">
-    30 days subscription
+    <div class="show-stuff">
+        <p style="font-size: 140%;">1 days subscription</p>
+        <p style="font-size: 120%;">Price: {{thirtyDaysPrice}} $</p>
+        <div class="form-group">
+            <label for="datePick">Start date</label>
+            <input
+                id="datePick" 
+                name="datePick" 
+                bsDatepicker 
+                [(ngModel)]="datePick2" 
+                type="text" 
+                class="form-control" 
+                #dp="bsDatepicker"
+                [bsConfig]="{ dateInputFormat: 'DD - MM - YYYY' }"
+                [minDate]="minDate"
+                [maxDate]="maxDate" 
+                [daysDisabled]="[0]">
+        </div>
+        <br>
+        <form [formGroup]="form2">  
+            <div class="form-group">  
+                <label for="facility">Facility:</label>  
+                <select formControlName="facility" class="form-control">  
+                    <option>Choose facility</option>  
+                    <option *ngFor="let facility of facilities$">{{facility.id}}. {{facility.city}} </option>  
+                </select>  
+            </div>
+        </form>
+        <br>
+        <button class="btn btn-primary" id="button2" (click)="buy2()">Buy 30 days subscription</button>     
+        <br>
+    </div>
     <br>
-</div>
-<br>
 
-<div class="show-stuff">
-    1 year subscription
-    <br>
+    <div class="show-stuff">
+        <p style="font-size: 140%;">1 year subscription</p>
+        <p style="font-size: 120%;">Price: {{oneYearPrice}} $</p>
+        <div class="form-group">
+            <label for="datePick">Start date</label>
+            <input
+                id="datePick" 
+                name="datePick" 
+                bsDatepicker 
+                [(ngModel)]="datePick3" 
+                type="text" 
+                class="form-control" 
+                #dp="bsDatepicker"
+                [bsConfig]="{ dateInputFormat: 'DD - MM - YYYY' }"
+                [minDate]="minDate"
+                [maxDate]="maxDate" 
+                [daysDisabled]="[0]">
+        </div>
+        <br>
+        <form [formGroup]="form3">  
+            <div class="form-group">  
+                <label for="facility">Facility:</label>  
+                <select formControlName="facility" class="form-control">  
+                    <option>Choose facility</option>  
+                    <option *ngFor="let facility of facilities$">{{facility.id}}. {{facility.city}} </option>  
+                </select>  
+            </div>
+        </form>
+        <br>
+        <button class="btn btn-primary" id="button2" (click)="buy3()">Buy 1 year subscription</button>   
+        <br>
+    </div>
 </div>
