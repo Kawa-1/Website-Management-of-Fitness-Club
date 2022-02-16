@@ -78,6 +78,9 @@ def create_app():
     from myapplication.api.instructors.api import InstructorsApi
     api.add_resource(InstructorsApi, "/api/instructors")
 
+    from myapplication.api.facilities.api import FacilitiesApi
+    api.add_resource(FacilitiesApi, "/api/facilities")
+
     from myapplication.api.auth.api import Test
     api.add_resource(Test, "/test")
 
