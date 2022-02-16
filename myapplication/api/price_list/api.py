@@ -31,7 +31,8 @@ class PriceOnService(Resource):
         cmd = """
                     SELECT p.id, p.price, p.service_id, t.name_of_service, t.is_subscription 
                     FROM fit.types_of_services t 
-                    INNER JOIN fit.price_list p ON p.service_id=%d
+                    INNER JOIN fit.price_list p ON p.service_id=t.id
+					WHERE p.service_id=%d
               """ % service_id
 
         price_on_service = db.session.execute(cmd).cursor.fetchall()
