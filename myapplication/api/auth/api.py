@@ -1,7 +1,7 @@
 import jwt
 from flask_restful import Resource, request, current_app, marshal_with, fields
 from datetime import datetime, timedelta
-from flask import json, url_for, jsonify
+from flask import json, url_for, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from bleach import clean
 from myapplication.api.auth.auth import check_email, check_postcode, check_number, send_email_confirm, token_required
@@ -32,17 +32,17 @@ class UserApi(Resource):
 
     #@marshal_with(user_fields)
     @token_required
-    def get(self, current_user=None):
+    def get(self):
         resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
                             "timestamp": timestamp},
-                "user": {"first_name": current_user.first_name, "last_name": current_user.last_name, "city": current_user.city,
-                         "street": current_user.street, "house_number": current_user.house_number, "postcode": current_user.postcode,
-                         "email": current_user.email, "is_instructor": current_user.is_instructor,
-                         "created_at": str(current_user.created_at), "confirmed": current_user.confirmed}}
+                "user": {"first_name": g.user.first_name, "last_name": g.user.last_name, "city": g.user.city,
+                         "street": g.user.street, "house_number": g.user.house_number, "postcode": g.user.postcode,
+                         "email": g.user.email, "is_instructor": g.user.is_instructor,
+                         "created_at": str(g.user.created_at), "confirmed": g.user.confirmed}}
         resp = jsonify(resp)
         resp.status_code = 200
         return resp
-        # return current_user
+        # return g.user
 
 
 class RegisterUserApi(Resource):
@@ -228,10 +228,10 @@ class LoginUserApi(Resource):
 
 class LogoutUserApi(Resource):
     @token_required
-    def post(self, current_user=None):
+    def post(self):
         auth_token = request.headers.get('Authorization').split(" ")[1]
 
-        email_current_user = current_user.email
+        #email_user = g.user.email
 
         if auth_token:
             if not BlackListToken.check_blacklist(auth_token):
@@ -255,16 +255,16 @@ class LogoutUserApi(Resource):
                                         "method": "POST", "timestamp": timestamp}}
                 return err_resp, 400
 
-        else:
-            err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
-                                    "name": "Lack of token",
-                                    "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
+        #else:
+        #    err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 400,
+        #                            "name": "Lack of token",
+        #                            "method": "POST", "timestamp": timestamp}}
+        #    return err_resp, 400
 
 
 class PasswordUserApi(Resource):
     @token_required
-    def put(self, current_user=None):
+    def put(self):
         password = request.form.get('password')
         repeat_password = request.form.get('repeat_password')
 
@@ -276,7 +276,7 @@ class PasswordUserApi(Resource):
 
         password = generate_password_hash(password)
 
-        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, current_user.email
+        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, g.user.email
         db.session.execute(cmd)
         db.session.commit()
 
@@ -288,7 +288,7 @@ class PasswordUserApi(Resource):
 
 class refresh_token(Resource):
     @token_required
-    def post(self, current_user=None):
+    def post(self):
         key = current_app.config['SECRET_KEY']
         token = request.headers.get("Authorization").split(" ")[1]
 
@@ -323,7 +323,7 @@ class refresh_token(Resource):
         else:
             return err_resp, 400
 
-        new_token = jwt.encode({"id": current_user.id, "email": current_user.email, "first_name": current_user.first_name, "last_name": current_user.last_name,
+        new_token = jwt.encode({"id": g.user.id, "email": g.user.email, "first_name": g.user.first_name, "last_name": g.user.last_name,
                             "exp": datetime.utcnow() + timedelta(days=1)}, key, algorithm="HS256")
 
         resp = {"message": {"description": "Old Token has been blacklisted and new one is generated", "status": 200, "name": "Old Token is blacklisted; new one generated",

@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, g
 from flask_restful import Resource
 from myapplication import db
 from datetime import datetime

@@ -1,6 +1,6 @@
 import jwt
 from flask_restful import Resource
-from flask import request, json, current_app
+from flask import request, json, current_app, g
 from datetime import datetime
 from myapplication.api.activities.check import check_date_format, check_month_format, check_year_format
 from myapplication.api.auth.auth import token_required
@@ -12,7 +12,7 @@ timestamp = str(datetime.utcnow())
 # class involved with activities (classes ~ activity involved with fitness) table
 class ActivityApi(Resource):
     #@token_required
-    #current_user = None
+    #g.user = None
     def get(self, date=None, limit=5):
         """Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         if we are not passing any date parameter:
@@ -105,8 +105,8 @@ class ActivityApi(Resource):
 
 class UserActivityApi(Resource):
     @token_required
-    def get(self, current_user=None):
-        user_id = current_user.id
+    def get(self):
+        user_id = g.user.id
         # TODO: Get each activity in which particular user took part; DESC - 1st row will be the newest
         cmd =  """SELECT t.name_of_service, a.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
         (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=c.id GROUP BY c.id), c.id, pr.price, pr.service 
@@ -135,7 +135,7 @@ class UserActivityApi(Resource):
         return dictionary, 200
 
     @token_required
-    def post(self, current_user=None):
+    def post(self):
         """Signing up for activities. ID indicates id of activity
             DESIRED BODY: e.g. {"id": 1}
         """
@@ -163,7 +163,7 @@ class UserActivityApi(Resource):
                                     "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "SELECT user_id FROM fit.participation WHERE user_id=%d AND activity_id=%d" %  (current_user.id, activity_id)
+        cmd = "SELECT user_id FROM fit.participation WHERE user_id=%d AND activity_id=%d" %  (g.user.id, activity_id)
         res = db.session.execute(cmd).cursor.fetchone()
         if res is not None:
             err_resp = {"message": {
@@ -172,15 +172,15 @@ class UserActivityApi(Resource):
             return err_resp, 400
 
 
-        db.session.add(Participation(user_id=current_user.id, activity_id=activity_id))
+        db.session.add(Participation(user_id=g.user.id, activity_id=activity_id))
         db.session.commit()
 
-        resp = {"message": {"description": "User properly signed up for activity with email: {} and activity_id: {}".format(current_user.email, activity_id),
+        resp = {"message": {"description": "User properly signed up for activity with email: {} and activity_id: {}".format(g.user.email, activity_id),
                                     "status": 201, "name": "signed up for activity", "method": "POST", "timestamp": timestamp}}
         return resp, 201
 
     @token_required
-    def delete(self, current_user=None, activity_id=None):
+    def delete(self, activity_id=None):
         cmd = "SELECT id FROM fit.activities WHERE id=%d" % activity_id
         res = db.session.execute(cmd).cursor.fetchone()
 
@@ -190,12 +190,12 @@ class UserActivityApi(Resource):
                 "status": 400, "name": "cannot delete", "method": "DELETE", "timestamp": timestamp}}
             return err_resp, 400
 
-        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND activity_id=%d" % (current_user.id, activity_id)
+        cmd = "DELETE FROM fit.participation WHERE user_id=%d AND activity_id=%d" % (g.user.id, activity_id)
         db.session.execute(cmd)
         db.session.commit()
 
         resp = {"message": {
-            "description": "User properly signed off the activity user's email: {} and activity_id: {}".format(current_user.email, activity_id),
+            "description": "User properly signed off the activity user's email: {} and activity_id: {}".format(g.user.email, activity_id),
             "status": 202, "name": "User deleted from activity", "method": "DELETE", "timestamp": timestamp}}
         return resp, 202
 

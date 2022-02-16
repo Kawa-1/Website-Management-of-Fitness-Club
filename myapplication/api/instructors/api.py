@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import json, request
+from flask import json, request, g
 from datetime import datetime, timedelta
 from myapplication.models import Users, Activities
 from myapplication import db
@@ -122,8 +122,8 @@ class InstructorsApi(Resource):
         return resp, 200
 
     @token_required
-    def put(self, current_user=None):
-        if current_user.is_instructor != 1:
+    def put(self):
+        if g.user.is_instructor != 1:
             err_resp = {
                 "message": {"description": "This user ain't instructor!", "name": "Forbidden method for this kind of users\
                                                                                   who are not instructors",
@@ -132,11 +132,11 @@ class InstructorsApi(Resource):
 
         date = request.form.get('date')
         type_of_service_id = request.form.get('type_of_service_id')
-        instructor_id = current_user.id
+        instructor_id = g.user.id
         facility_id = request.form.get('facility_id')
         price_id = request.form.get('price_id')
 
-        new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=current_user.id,
+        new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
                                   facility_id=facility_id, price_id=price_id)
 
         db.session.add(new_activity)
@@ -144,7 +144,7 @@ class InstructorsApi(Resource):
 
         cmd = """SELECT name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
                 (SELECT city FROM fit.facilities WHERE %d=id), (SELECT price FROM fit.price_list WHERE %d=id)
-                FROM fit.types_of_services WHERE %d=id""" % (current_user.id, facility_id, price_id, type_of_service_id)
+                FROM fit.types_of_services WHERE %d=id""" % (g.user.id, facility_id, price_id, type_of_service_id)
         res = db.session.execute(cmd).cursor.fetchone()
 
         if res[0] is None or res[2] is None or res[3] is None:

@@ -1,7 +1,7 @@
 import jwt
 import re
 from functools import wraps
-from flask import request, json, current_app, url_for
+from flask import request, json, current_app, url_for, g
 from flask_mail import Message
 from datetime import datetime
 from myapplication import mail
@@ -39,8 +39,8 @@ def token_required(f):
 		try:
 			data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms="HS256")
 			print("decoded ", data)
-			current_user = Users.query.filter_by(id=data['id']).first()
-			if current_user is None:
+			g.user = Users.query.filter_by(id=data['id']).first()
+			if g.user is None:
 				err_resp = {
 					"message": {"description": "Such user doesn't exist", "status": 401, "name": "Cannot auth; token required",
 								'timestamp': timestamp}}
@@ -52,7 +52,7 @@ def token_required(f):
 			print('error 53', jwt.ExpiredSignature)
 			return err_resp, 401
 
-		return f(current_user, *args, **kwargs)
+		return f(*args, **kwargs)
 	return decorator
 
 
