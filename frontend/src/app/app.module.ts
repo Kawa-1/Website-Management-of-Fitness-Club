@@ -21,6 +21,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { YourProfileComponent } from './your-profile/your-profile.component';
 import { ActivitiesComponent } from './activities/activities.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
+import { AuthInterceptor } from './services/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,7 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
     TimepickerModule.forRoot(),
     BsDatepickerModule.forRoot(),
   ],
-  providers: [],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

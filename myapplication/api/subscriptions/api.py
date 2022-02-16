@@ -88,7 +88,7 @@ class StartSubscription(Resource):
                 "timestamp": timestamp}}
             return resp, 201
 
-        elif type_of_pass = 'pass_30d':
+        elif type_of_pass == 'pass_30d':
             end_date = datetime_to_string((start_date + timedelta(days=30)))
             start_date = datetime_to_string(start_date)
             sub = Subscriptions(start_date=start_date, end_date=end_date, service_id=service_id, user_id=user_id,

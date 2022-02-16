@@ -1,8 +1,11 @@
 .show-stuff{
-    padding-right: 600px;
-    padding-left: 600px;
+    /* padding-right: 600px;
+    padding-left: 600px; */
     text-align: left;
     font-size: 120%;
+    border-style: outset;
+    border-radius: 10px;
+    border-color: red;
 }
   
 .show-recipes{

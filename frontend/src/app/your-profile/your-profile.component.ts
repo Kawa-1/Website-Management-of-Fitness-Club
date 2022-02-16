@@ -12,10 +12,8 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class YourProfileComponent implements OnInit {
   public isLoggedIn: boolean = false;
-  public usersUsername:any = "elo";
-  public myToken: any;
+  public usersUsername:any = "";
   public user_id:any;
-
 
   constructor(
     private auth: AuthService, 
@@ -44,12 +42,12 @@ export class YourProfileComponent implements OnInit {
   }
 
   logout(){
-    this.myToken = this.cookieService.get('token');
-    if (this.myToken) {
-      console.log(this.myToken)
-      this.auth.logout(this.myToken)
+    const token = this.cookieService.get('token');
+    if (token) {
+      this.auth.logout(token)
       .then((data) => {
-        if (data.status === 'success') {
+        console.log(data)
+        if (data.message.status === 200) {
           this.toastr.success('Logged out successfully');
           timer(1500).subscribe(x => { this.isLoggedIn = false;})
           this.cookieService.delete('token')
