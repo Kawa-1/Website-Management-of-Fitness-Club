@@ -120,3 +120,6 @@ def check_number(number: str) -> bool:
 		return True
 	else:
 		return False
+
+def check_date_subscription(date):
+	regex = '^[0-9]{4}-[0-9'

@@ -219,7 +219,9 @@ def create_app():
     #     db.session.commit()
     #     print('done')
 
+    from myapplication.api.facilities.helpers import limit_offset
     @app.route('/', methods=['GET'])
+    @limit_offset
     def hello():
         arguments = request.args.get("username")
         print(type(arguments))
@@ -227,6 +229,8 @@ def create_app():
         data = request.get_json(silent=True)
         print(data)
         g.user = arguments
+        print(g.limit)
+        print(g.offset)
         print(g)
         print(g.user)
         js = {"message": {"hej": "hej"}}

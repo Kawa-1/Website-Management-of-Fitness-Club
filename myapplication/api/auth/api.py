@@ -8,6 +8,7 @@ from myapplication.api.auth.auth import check_email, check_postcode, check_numbe
 from myapplication import db
 from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
+from myapplication.api.facilities.helpers import limit_offset
 
 timestamp = str(datetime.utcnow())
 
@@ -32,6 +33,7 @@ class UserApi(Resource):
 
     #@marshal_with(user_fields)
     @token_required
+    @limit_offset
     def get(self):
         resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
                             "timestamp": timestamp},
@@ -41,6 +43,7 @@ class UserApi(Resource):
                          "created_at": str(g.user.created_at), "confirmed": g.user.confirmed}}
         resp = jsonify(resp)
         resp.status_code = 200
+        print(g.limit, g.offset)
         return resp
         # return g.user
 
