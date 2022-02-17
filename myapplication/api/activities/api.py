@@ -38,7 +38,7 @@ class ActivityApi(Resource):
                 return err_resp, 400
 
         if date is None:
-            cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
+            cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email, 
                     (SELECT COUNT(p.id) FROM fit.participation p WHERE p.activity_id=a.id), a.id
                     FROM fit.activities a
                     INNER JOIN fit.facilities f ON a.facility_id=f.id
