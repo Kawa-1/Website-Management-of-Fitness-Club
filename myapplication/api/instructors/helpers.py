@@ -1,5 +1,6 @@
 import re
 
+# deprecated
 def check_date_activities(date: str) -> bool:
     regex = "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}-[0-9]{2}$"
     date = str(date)

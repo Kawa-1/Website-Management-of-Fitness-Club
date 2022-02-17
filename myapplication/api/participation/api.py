@@ -58,17 +58,18 @@ class UserActivityApi(Resource):
         body = request.get_json(silent=True)
         activity_id = body.get('id')
 
-        if not body or activity_id is None:
+        if not body or activity_id is None or not isinstance(activity_id, int):
             err_resp = {"message": {"description": "lack of information to which activity user want to be signed",
-                                    "status": 400, "name": "lack of body; json", "method": "POST", "timestamp":
+                                    "status": 404, "name": "lack of body; json", "method": "POST", "timestamp":
                                     timestamp}}
-            return err_resp, 400
+            return err_resp, 404
 
+        # isinstance or check_int... However i will leave it how it is; project is made majorly for research purposes; university project
         check = check_int(activity_id=activity_id)
 
         if check[0] is False:
             err_resp = {
-                "message": {"description": "This", "name": "Bad type in form {}".format(check[1]),
+                "message": {"description": "activity_id is not an int", "name": "Bad type in form",
                             "status": 400, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 400
 
@@ -78,8 +79,8 @@ class UserActivityApi(Resource):
         if number_of_users is None:
             err_resp = {"message": {
                 "description": "Such activity doesn't exist",
-                "status": 400, "name": "cannot sign up", "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
+                "status": 404, "name": "cannot sign up", "method": "POST", "timestamp": timestamp}}
+            return err_resp, 404
 
         number_of_users = number_of_users[0]
         if number_of_users >= 15:
@@ -105,6 +106,15 @@ class UserActivityApi(Resource):
 
     @token_required
     def delete(self, activity_id=None):
+        if not isinstance(activity_id, int):
+            try:
+                activity_id = int(activity_id)
+            except Exception as e:
+                err_resp = {"message": {
+                    "description": "activity_id bad type",
+                    "status": 422, "name": "cannot delete", "method": "DELETE", "timestamp": timestamp}}
+                return err_resp, 422
+
         cmd = "SELECT id FROM fit.activities WHERE id=%d" % activity_id
         res = db.session.execute(cmd).cursor.fetchone()
 

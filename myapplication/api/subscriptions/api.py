@@ -5,6 +5,8 @@ from myapplication.api.auth.auth import token_required
 from datetime import datetime, timedelta
 from myapplication.api.activities.check import check_date_format
 from myapplication.models import Subscriptions
+from myapplication.global_helpers import valid_date_day
+from bleach import clean
 
 timestamp = str(datetime.utcnow())
 
@@ -39,7 +41,7 @@ class StartSubscription(Resource):
 
         if service_id is None or not isinstance(service_id, int) or facility_id is None or not isinstance(facility_id, int) or \
                 price_id is None or not isinstance(price_id, int) or start_date is None or not isinstance(start_date, str) or \
-                not check_date_format(start_date):
+                not valid_date_day(start_date):
             err_resp = {"message": {
                 "description": "Not all parameters properly provided",
                 "status": 400, "name": "lack of proper parameters", "method": "POST",
@@ -79,6 +81,8 @@ class StartSubscription(Resource):
         if type_of_pass == "pass_1d":
             start_date = datetime_to_string(start_date)
             end_date = start_date
+            start_date = clean(start_date)
+            end_date = clean(end_date)
             sub = Subscriptions(start_date=start_date, end_date=end_date, service_id=service_id, user_id=user_id,
                                 facility_id=facility_id, price_id=price_id)
             db.session.add(sub)
@@ -92,6 +96,8 @@ class StartSubscription(Resource):
         elif type_of_pass == 'pass_30d':
             end_date = datetime_to_string((start_date + timedelta(days=30)))
             start_date = datetime_to_string(start_date)
+            end_date = clean(end_date)
+            start_date = clean(start_date)
             sub = Subscriptions(start_date=start_date, end_date=end_date, service_id=service_id, user_id=user_id,
                                 facility_id=facility_id, price_id=price_id)
             db.session.add(sub)
@@ -105,6 +111,8 @@ class StartSubscription(Resource):
         elif type_of_pass == 'pass_1yr':
             end_date = datetime_to_string((start_date + timedelta(days=365)))
             start_date = datetime_to_string(start_date)
+            end_date = clean(end_date)
+            start_date = clean(start_date)
             sub = Subscriptions(start_date=start_date, end_date=end_date, service_id=service_id, user_id=user_id,
                                 facility_id=facility_id, price_id=price_id)
             db.session.add(sub)

@@ -28,6 +28,15 @@ class PriceOnService(Resource):
 
             return resp, 200
 
+        if not isinstance(service_id, int):
+            try:
+                service_id = int(service_id)
+            except Exception as e:
+                err_resp = {"message": {
+                    "description": "service_id bad type",
+                    "status": 422, "name": "cannot process this request", "method": "GET", "timestamp": timestamp}}
+                return err_resp, 422
+
         cmd = """
                     SELECT p.id, p.price, p.service_id, t.name_of_service, t.is_subscription 
                     FROM fit.types_of_services t 

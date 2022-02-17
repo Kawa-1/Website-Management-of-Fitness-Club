@@ -8,7 +8,7 @@ from myapplication.api.auth.auth import check_email, check_postcode, check_numbe
 from myapplication import db
 from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
-from myapplication.api.facilities.helpers import limit_offset
+from myapplication.global_helpers import valid_date_day
 
 timestamp = str(datetime.utcnow())
 
@@ -33,7 +33,6 @@ class UserApi(Resource):
 
     #@marshal_with(user_fields)
     @token_required
-    @limit_offset
     def get(self):
         resp = {"message": {"description": "Current user returned", "name": "user info", "status": 200, "method": "GET",
                             "timestamp": timestamp},
@@ -43,7 +42,6 @@ class UserApi(Resource):
                          "created_at": str(g.user.created_at), "confirmed": g.user.confirmed}}
         resp = jsonify(resp)
         resp.status_code = 200
-        print(g.limit, g.offset)
         return resp
         # return g.user
 
@@ -57,6 +55,14 @@ class ValidateUserSubscription(Resource):
         post_data = request.get_json()
         date_then = post_data.get('date')
 
+        check = valid_date_day(date_then)
+        date_then = clean(date_then)
+        if check is False:
+            err_resp = {"message": {"description": "Improper format of date",
+                                "method": "POST", "name": "bad format of date", "status": 422,
+                                "timestamp": timestamp}}
+            return err_resp, 422
+
         cmd = """SELECT s.id, s.start_date, s.end_date, t.name_of_service, f.city, f.street, f.house_number, pr.price
                 FROM fit.subscriptions s
                 INNER JOIN fit.types_of_services t ON s.service_id=t.id
@@ -68,10 +74,10 @@ class ValidateUserSubscription(Resource):
         user_valid_subs = db.session.execute(cmd).cursor.fetchall()
 
         if len(user_valid_subs) == 0:
-            err = {"message": {"description": "User has no valid subscriptions right now",
+            resp = {"message": {"description": "User has no valid subscriptions right now",
                                    "method": "POST", "name": "Lack of subscriptions", "status": 204,
                                    "timestamp": timestamp}}
-            return err_resp, 204
+            return resp, 204
 
         resp = {"message": {"description": "Valid subscriptions returned",
                                    "method": "POST", "name": "valid subscriptions by user", "status": 200,
@@ -117,38 +123,38 @@ class RegisterUserApi(Resource):
             err_resp = {"message": {"description": "Format of email is incorrect",
                                     "method": "POST", "name": "Failed registration", "status": 400,
                                     "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         if user:
             err_resp = {"message": {"description": "Such user already exists",
                                     "method": "POST", "name": "Failed registration", "status": 400,
                                     "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 409
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
             err_resp = {"message": {"description": "Provided empty field, bad semantics, something exists so far etc.",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         if check_postcode(postcode) is False:
             err_resp = {"message": {"description": "Check postcode failed",
                         "method": "POST", "name": "Failed registration", "status": 400,
                         "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         if password != repeat_password:
             err_resp = {"message": {"description": "Passwords are not correct",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         if check_number(house_number) is False:
             err_resp = {"message": {"description": "Check house number failed",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         first_name = clean(first_name)
         last_name = clean(last_name)
@@ -188,13 +194,13 @@ class SendEmailConfirmationApi(Resource):
         if email is None or not check_email(email):
             err_resp = {"message": {"description": "Bad format of email", "confirmation_email": "Has not been sent", "status": 400,
                                         "name": "email confirmation; error", "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
+            return err_resp, 422
 
         send = send_email_confirm(email)
         if send[0] is False:
             err_resp = {"message": {"description": "Mail has not been sent", "confirmation_email": "Has not been sent",
-                                    "status": 400, "name": send[1], "method": "POST", "timestamp": timestamp}}
-            return err_resp, 400
+                                    "status": 500, "name": send[1], "method": "POST", "timestamp": timestamp}}
+            return err_resp, 500
 
         resp = {"message": {"description": "Confirmation mail has been sent", "confirmation_email": send[1], "status": 200,
                                      "name": "confirmation of account", "method": "POST", "timestamp": timestamp}}
@@ -210,9 +216,9 @@ class ConfirmEmail(Resource):
             cmd = "SELECT id FROM fit.users where email=\'%s\'" % email
             user = db.session.execute(cmd).cursor.fetchone()
             if user is None:
-                err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 400,
+                err_resp = {"message": [{"description": "Account couldn't be confirmed", "status": 404,
                                          "name": "This account doesn't exist", "method": "GET", "timestamp": timestamp}]}
-                return err_resp, 400
+                return err_resp, 404
 
             cmd = "UPDATE fit.users SET confirmed=1 WHERE email=\'%s\'" % email
             db.session.execute(cmd)
@@ -238,10 +244,8 @@ class LoginUserApi(Resource):
         email = post_data.get('email')
         password = post_data.get('password')
 
-        # key = current_app.config['SECRET_KEY']
-
-        # email = request.form.get('email')
-        # password = request.form.get('password')
+        email = clean(email)
+        password = clean(password)
 
         user = Users.query.filter_by(email=email).first()
 
@@ -272,9 +276,8 @@ class LogoutUserApi(Resource):
     @token_required
     def post(self):
         auth_token = request.headers.get('Authorization').split(" ")[1]
+        auth_token = clean(auth_token)
         print('logout: ', auth_token)
-
-        #email_user = g.user.email
 
         if auth_token:
             if not BlackListToken.check_blacklist(auth_token):
@@ -287,7 +290,7 @@ class LogoutUserApi(Resource):
                     return resp, 200
 
                 else:
-                    err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 200,
+                    err_resp = {"message": {"description": "User could not log out; token can't be blacklisted", "status": 400,
                                         "name": "Token is invalid",
                                         "method": "POST", "timestamp": timestamp}}
                     return err_resp, 400
@@ -335,6 +338,7 @@ class refresh_token(Resource):
     def post(self):
         key = current_app.config['SECRET_KEY']
         token = request.headers.get("Authorization").split(" ")[1]
+        token = clean(token)
 
         ep = datetime(1970, 1, 1, 0, 0, 0)
         now = (datetime.utcnow() - ep).total_seconds()
@@ -342,12 +346,12 @@ class refresh_token(Resource):
         time_to_expire = expire - now
 
         if time_to_expire > 7200:
-            err_resp = {"message": {"description": "Only tokens with expire time < 2h can be refreshed", "status": 201,
+            err_resp = {"message": {"description": "Only tokens with expire time < 2h can be refreshed", "status": 400,
                                 "name": "Token has not been refreshed",
                                 "method": "POST", "timestamp": timestamp}}
             return err_resp, 400
 
-        err_resp = {"message": {"description": "Token can't be blacklisted", "status": 200,
+        err_resp = {"message": {"description": "Token can't be blacklisted", "status": 400,
                                 "name": "Token is invalid",
                                 "method": "POST", "timestamp": timestamp}}
 

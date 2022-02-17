@@ -1,3 +1,4 @@
+from bleach import clean
 from flask_restful import Resource
 from flask import json, request, g
 from datetime import datetime, timedelta
@@ -5,35 +6,14 @@ from myapplication.models import Users, Activities
 from myapplication import db
 from myapplication.api.auth.auth import check_email, token_required
 from myapplication.api.instructors.helpers import check_int, check_date_activities
+from myapplication.global_helpers import limit_offset, valid_date_H_M
 
 timestamp = str(datetime.utcnow())
 
 class InstructorsApi(Resource):
-    def get(self, limit=5, offset=0):
-        limit_ = request.args.get("limit")
-        offset_ = request.args.get("offset")
-
-        if limit_ is not None:
-            try:
-                limit = int(limit_)
-            except Exception as e:
-                err_resp = {"message": {
-                    "description": "Argument limit must be int",
-                    "status": 400, "name": "invalid format of parameter limit", "method": "GET",
-                    "timestamp": timestamp}}
-                return err_resp, 400
-
-        if offset_ is not None:
-            try:
-                offset = int(offset_)
-            except Exception as e:
-                err_resp = {"message": {
-                    "description": "Argument offset must be int",
-                    "status": 400, "name": "invalid format of parameter offset", "method": "GET",
-                    "timestamp": timestamp}}
-                return err_resp, 400
-
-        cmd = """SELECT u.id, u.first_name, u.last_name, u.email FROM fit.users u WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (offset, limit)
+    @limit_offset
+    def get(self):
+        cmd = """SELECT u.id, u.first_name, u.last_name, u.email FROM fit.users u WHERE u.is_instructor=1 OFFSET %d LIMIT %d""" % (g.offset, g.limit)
         instructors = db.session.execute(cmd).fetchall()
 
         if len(instructors) == 0:
@@ -51,19 +31,16 @@ class InstructorsApi(Resource):
 
         return resp, 200
 
+    @limit_offset
     def post(self):
         """Getting activities with facilities involved with particular instructor"""
         post_data = request.get_json()
         email = post_data.get("email")
-        limit = post_data.get("limit")
-        offset = post_data.get("offset")
+
+        email = clean(email)
 
         user = Users.query.filter_by(email=email).first()
 
-        if limit is None:
-            limit = 10
-        if offset is None:
-            offset = 0
         if user is None:
             err_resp = {"message": {"description": "There is not even single instructor!", "name": "lack of instructors",
                                 "status": 204, "method": "GET", "timestamp": timestamp},
@@ -93,7 +70,7 @@ class InstructorsApi(Resource):
                     INNER JOIN fit.facilities f ON f.id=a.facility_id
                     INNER JOIN fit.types_of_activities t ON t.id=a.type_of_service_id
                     WHERE u.email=\'%s\' AND u.is_instructor=1
-                    ORDER BY a.date DESC OFFSET %d LIMIT %d""" % (email, offset, limit)
+                    ORDER BY a.date DESC OFFSET %d LIMIT %d""" % (email, g.offset, g.limit)
 
         instructors_activities = db.session.execute(cmd).cursor.fetchall()
 
@@ -137,12 +114,13 @@ class InstructorsApi(Resource):
         facility_id = request.form.get('facility_id')
         #price_id = request.form.get('price_id')
 
-        if not check_date_activities(date):
-            err_resp = {
-                "message": {"description": "Bad format of date {}".format(date), "name": "Format of date is improper",
-                            "status": 400, "method": "PUT", "timestamp": timestamp}}
-            return err_resp, 400
+        date = clean(date)
 
+        if not valid_date_H_M(date):
+            err_resp = {
+                "message": {"description": "Bad format of date", "name": "Format of date is improper",
+                            "status": 422, "method": "PUT", "timestamp": timestamp}}
+            return err_resp, 422
 
         check = check_int(type_of_service_id=type_of_service_id, facility_id=facility_id)
 
@@ -155,8 +133,8 @@ class InstructorsApi(Resource):
                     "message": {"description": "One of the fields couldn't be conversed "
                                                "to int {}, {}".format(type_of_service_id, facility_id),
                                 "name": "Impossible conversion",
-                                "status": 400, "method": "PUT", "timestamp": timestamp}}
-                return err_resp, 400
+                                "status": 422, "method": "PUT", "timestamp": timestamp}}
+                return err_resp, 422
 
         cmd = """SELECT t.name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
                 (SELECT city FROM fit.facilities WHERE %d=id), pr.price, pr.id
