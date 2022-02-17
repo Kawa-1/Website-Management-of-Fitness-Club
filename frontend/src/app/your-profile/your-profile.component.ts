@@ -39,6 +39,19 @@ export class YourProfileComponent implements OnInit {
     else{
       this.isLoggedIn = false;
     }
+
+    this.auth.getUserActivity().then(
+      data=>{
+        console.log(data)
+      }
+    )
+
+    this.auth.getUserSubs().then(
+      data=>{
+        console.log(data)
+      }
+    )
+    
   }
 
   logout(){

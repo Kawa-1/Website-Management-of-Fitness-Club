@@ -1,3 +1,4 @@
+import { BodyDate } from './../models/BodyDate';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { AuthService } from '../services/auth.service';
@@ -5,6 +6,7 @@ import { FormGroup, FormControl, Validators} from '@angular/forms';
 import { CookieService } from 'ngx-cookie-service';
 import { ToastrService } from 'ngx-toastr';
 import { DatePipe } from '@angular/common';
+import { BodyId } from '../models/BodyId';
 
 @Component({
   selector: 'app-activities',
@@ -29,6 +31,7 @@ export class ActivitiesComponent implements OnInit {
   public instructors$: any = [];
   public facilities$: any = [];
   public activities$: any = [];
+  public allActvities$: any =[];
   public user_id: any;
   public usersUsername: any = "";
   public price_id: any;
@@ -72,7 +75,6 @@ export class ActivitiesComponent implements OnInit {
     if (token){
       this.auth.ensureAuthenticated(token)
       .then((user) => {
-        console.log(user)
         if (user.message.status === 200) {
           this.isLoggedIn = true;
           this.usersUsername = user.user.first_name;
@@ -89,6 +91,11 @@ export class ActivitiesComponent implements OnInit {
     else{
       this.openForm = true;
     }
+
+    this.auth.getActivities()
+    .then((data)=>{
+      this.allActvities$ = data.activities;
+    })
   }
 
   openAdd(): void{
@@ -115,13 +122,7 @@ export class ActivitiesComponent implements OnInit {
   addActivity(): void{
     if(this.form1.value.activity != "" && this.form2.value.facility != ""  && this.form3.value.hour != "" && this.form4.value.minute != ""){
       var array1 = this.form1.value.activity.split('.');
-      var activity_id: number = +array1[0];
-
-      this.auth.getPrice(activity_id).then(
-        data=>{
-          this.price_id = data.price_service[0].price_id;
-        }
-      )
+      var type_of_service_id: number = +array1[0];
 
       var array2 = this.form2.value.facility.split('.');
       var facility_id: number = +array2[0];
@@ -132,9 +133,8 @@ export class ActivitiesComponent implements OnInit {
       let latest_date =this.datepipe.transform(this.datePick, 'yyyy-MM-dd hh-mm');
 
       formData.append("date", latest_date);
-      formData.append("type_of_service_id", activity_id);
+      formData.append("type_of_service_id", type_of_service_id);
       formData.append("facility_id", facility_id);
-      formData.append("price_id", this.price_id);
 
       this.auth.addActivity(formData).subscribe(
         data => {
@@ -145,8 +145,36 @@ export class ActivitiesComponent implements OnInit {
       formData.delete("date");
       formData.delete("type_of_service_id");
       formData.delete("facility_id");
-      formData.delete("price_id");
     }
+  }
+  
+  signUp(id: any):void {
+    let bodyId = new BodyId();
+    bodyId.id = id;
+    this.auth.signUpActivity(bodyId).then(
+      data=>{
+        if(data.message.status === 201){
+          this.toastr.success("Here you would proceed to buy")
+        }
+        else{
+          this.toastr.error(data.message.description)
+        }
+      }
+    )
+    this.auth.getActivities()
+    .then((data)=>{
+      this.allActvities$ = data.activities;
+    })
+  }
+
+  useSub(id:any, date:any):void {
+    let bodyDate = new BodyDate
+    bodyDate.date = date;
+    this.auth.checkIfSubbed(bodyDate).then(
+      data=>{
+        console.log(data)
+      }
+    )
   }
 
   goBack(): void {

@@ -89,4 +89,23 @@ export class AuthService {
     let url: string = this.path + "/instructors";
     return this.http.put(url, form)
   }
+
+  signUpActivity(id:any): Promise<any> {
+    let url: string = this.path + "/user_activity";
+    return this.http.post(url, id).toPromise();
+  }
+
+  checkIfSubbed(date: any): Promise<any> {
+    let url: string = this.path + "/user_valid_subscriptions";
+    return this.http.post(url, date).toPromise();
+  }
+
+  getUserActivity(): Promise<any> {
+    let url: string = this.path + "/user_activity";
+    return this.http.get(url).toPromise();
+  }  
+  getUserSubs(): Promise<any> {
+    let url: string = this.path + "/user_subscriptions";
+    return this.http.get(url).toPromise();
+  }
 }

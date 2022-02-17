@@ -87,11 +87,23 @@
     </form>
 </div>
 </div>
+<br><br>
 
-<div >
-
-
-
+<div *ngFor="let activity of allActvities$">
+    <div class="show-stuff">
+        <p style="font-size: 140%;">{{activity.type_of_service}} </p>
+        <p>Date: {{activity.date}}</p>
+        <p>Instructor: {{activity.first_name}} {{activity.last_name}}</p>
+        <p>Participants: {{activity.total_number_of_users}} / 15</p>
+        <div class="parent">
+            <div class="child">
+                <button class="btn btn-primary" id="button1" [hidden]="isInstructor" [disabled]="!isLoggedIn" (click)="signUp(activity.id)">Sign up ({{activity.price}} $)</button>
+            </div>
+            <div class="child">
+                <button class="btn btn-primary" id="button1" [hidden]="isInstructor" [disabled]="!isLoggedIn" (click)="useSub(activity.id, activity.date)">I have a subscription</button> 
+            </div>
+        </div>
+    </div>
 </div>
 
 

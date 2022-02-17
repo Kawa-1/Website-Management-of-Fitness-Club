@@ -13,7 +13,9 @@ export class AuthInterceptor implements HttpInterceptor{
 
         if(req.url=="http://localhost:5000/api/logout" || 
            req.url=="http://localhost:5000/api/start_subscription" || 
-           req.url=="http://localhost:5000/api/instructors"){
+           req.url=="http://localhost:5000/api/instructors" ||
+           req.url=="http://localhost:5000/api/user_activity" ||
+           req.url=="http://localhost:5000/api/user_valid_subscriptions"){
 
             let authToken = `Bearer ${this.cookieService.get('token')}`
             
@@ -35,7 +37,7 @@ export class AuthInterceptor implements HttpInterceptor{
                         this.toastr.error('Email already in use');
                     }
                     else if(req.url=="http://localhost:5000/api/login"){
-                        this.toastr.error(error.error.message.description);
+                        // this.toastr.error(error.error.message.description);
                     }
                     // else if(req.url=="http://localhost:5000/api/"){
                     //     this.toastr.error(error.error.message.description);
