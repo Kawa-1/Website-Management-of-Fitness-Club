@@ -5,7 +5,10 @@ def check_int(**kwargs):
         PARAMETERS:
             **kwargs
         RETURNS:
-            (bool, {key_form: val_form})
+            IF val is not int:
+                (bool, {key_form: val_form})
+            IF every single val is int:
+                bool
     """
     for key, val in kwargs.items():
         if not isinstance(val, int):

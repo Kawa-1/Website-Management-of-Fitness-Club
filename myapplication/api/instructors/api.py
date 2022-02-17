@@ -141,7 +141,7 @@ class InstructorsApi(Resource):
 
         if check[0] is False:
             err_resp = {
-                "message": {"description": "This", "name": "Bad type in form {}".format(check[1])
+                "message": {"description": "This", "name": "Bad type in form {}".format(check[1]),
                             "status": 400, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 400
 
