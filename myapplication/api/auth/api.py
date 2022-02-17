@@ -314,9 +314,10 @@ class PasswordUserApi(Resource):
                                     "method": "PUT", "timestamp": timestamp}}
             return err_resp, 400
 
+        password = clean(password)
         password = generate_password_hash(password)
 
-        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % password, g.user.email
+        cmd = "UPDATE fit.users SET users.password=\'%s\' WHERE users.email=\'%s\'" % (password, g.user.email)
         db.session.execute(cmd)
         db.session.commit()
 
