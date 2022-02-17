@@ -59,8 +59,8 @@ class Subscriptions(db.Model):
     __table_args__ = {'extend_existing': True, 'schema': 'fit'}
 
     id = db.Column(db.Integer, primary_key=True)
-    start_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=False)
+    start_date = db.Column(db.String(100), nullable=False)
+    end_date = db.Column(db.String(100), nullable=False)
 
     service_id = db.Column(db.Integer, db.ForeignKey('fit.types_of_services.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('fit.users.id'))
@@ -74,7 +74,7 @@ class Activities(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     #date = db.Column(db.String, nullable=False, default=datetime.utcnow().strftime("%Y-%m-%d %H-%M"))
-    date = db.Column(db.String, nullable=False)
+    date = db.Column(db.String(100), nullable=False)
 
     #instructor_id = db.Column(db.Integer, db.ForeignKey('fit.instructors.id'))
     type_of_service_id = db.Column(db.Integer, db.ForeignKey('fit.types_of_services.id'))

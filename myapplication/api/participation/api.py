@@ -33,7 +33,7 @@ class UserActivityApi(Resource):
                     INNER JOIN fit.participation p ON p.activity_id=a.id
                     INNER JOIN fit.price_list pr ON pr.id=a.price_id
                     INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
-                    WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id);"""
+                    WHERE %d IN (SELECT p1.user_id FROM fit.participation p1 WHERE p1.activity_id=a.id);""" % user_id
 
         classes_user_took = db.session.execute(cmd).cursor.fetchall()
         dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
