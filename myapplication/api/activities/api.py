@@ -38,7 +38,8 @@ class ActivityApi(Resource):
                 return err_resp, 400
 
         if date is None:
-            cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email 
+            cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email, 
+                    (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=a.id GROUP BY p.activity_id) as sum_of_users
                     FROM fit.activities a
                     INNER JOIN fit.facilities f ON a.facility_id=f.id
                     INNER JOIN fit.price_list p ON a.price_id=p.id
@@ -59,7 +60,7 @@ class ActivityApi(Resource):
                 dictionary['activities'].append(
                     {"date": obj[0], 'type_of_service': obj[1], 'city': obj[2], 'street': obj[3],
                      'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
-                     'last_name': obj[7], 'email': obj[8]})
+                     'last_name': obj[7], 'email': obj[8], "total_number_of_users": obj[9]})
 
             #dictionary['activities'] = sorted(dictionary['activities'], key=lambda i: i['date'], reverse=False)
             #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
@@ -72,7 +73,8 @@ class ActivityApi(Resource):
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
             return err_resp, 400
 
-        cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email
+        cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email,
+              (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=a.id GROUP BY p.activity_id) as sum_of_users
               FROM fit.activities a 
               INNER JOIN fit.facilities f ON a.facility_id=f.id
               INNER JOIN fit.price_list p ON a.price_id=p.id
@@ -96,7 +98,7 @@ class ActivityApi(Resource):
             dictionary['activities'].append(
                 {"date": obj[0], 'type_of_service': obj[1], 'city': obj[2], 'street': obj[3],
                  'house_number': obj[4], 'price': obj[5], 'first_name': obj[6],
-                 'last_name': obj[7], 'email': obj[8]})
+                 'last_name': obj[7], 'email': obj[8], "total_number_of_users": obj[9]})
 
         #dictionary['activities'] = sorted(dictionary['activities'], key = lambda i: i['date'], reverse=False)
         #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
