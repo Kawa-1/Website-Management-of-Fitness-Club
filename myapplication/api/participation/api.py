@@ -112,3 +112,9 @@ class UserActivityApi(Resource):
             "description": "User properly signed off the activity user's email: {} and activity_id: {}".format(g.user.email, activity_id),
             "status": 202, "name": "User deleted from activity", "method": "DELETE", "timestamp": timestamp}}
         return resp, 202
+
+
+class UsersOnParcipation(Resource):
+    @token_required
+    def get(self):
+            pass

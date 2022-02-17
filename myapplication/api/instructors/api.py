@@ -136,12 +136,6 @@ class InstructorsApi(Resource):
         facility_id = request.form.get('facility_id')
         price_id = request.form.get('price_id')
 
-        new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
-                                  facility_id=facility_id, price_id=price_id)
-
-        db.session.add(new_activity)
-        db.session.commit()
-
         cmd = """SELECT name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
                 (SELECT city FROM fit.facilities WHERE %d=id), (SELECT price FROM fit.price_list WHERE %d=id)
                 FROM fit.types_of_services WHERE %d=id""" % (g.user.id, facility_id, price_id, type_of_service_id)
@@ -153,6 +147,13 @@ class InstructorsApi(Resource):
                             "name": "Trying to add new activity",
                             "status": 404, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 404
+
+        new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
+                                  facility_id=facility_id, price_id=price_id)
+
+        db.session.add(new_activity)
+        db.session.commit()
+
 
         resp = {"message": {"description": "New activity has been created!",
                             "name": "Activity added",
