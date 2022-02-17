@@ -40,12 +40,12 @@ class UserActivityApi(Resource):
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
 
         for activity in classes_user_took:
-            dictionary['activities'].append({"name_of_service": classes_user_took[0], "date": classes_user_took[1],
-                                             "instructor_name": classes_user_took[2], "instructor_surname": classes_user_took[3],
-                                             "instructor_email": classes_user_took[4], "fitness_city": classes_user_took[4],
-                                             "fitness_street": classes_user_took[5], "fitness_house_number": classes_user_took[6],
-                                             "number_users_enrolled_total": classes_user_took[7], "id": classes_user_took[8],
-                                             "price": classes_user_took[9]})
+            dictionary['activities'].append({"name_of_service": activity[0], "date": activity[1],
+                                             "instructor_name": activity[2], "instructor_surname": activity[3],
+                                             "instructor_email": activity[4], "fitness_city": activity[5],
+                                             "fitness_street": activity[6], "fitness_house_number": activity[7],
+                                             "number_users_enrolled_total": activity[8], "id": activity[9],
+                                             "price": activity[10]})
 
         return dictionary, 200
 
