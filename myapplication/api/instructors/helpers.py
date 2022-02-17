@@ -1,3 +1,12 @@
+import re
+
+def check_date_activities(date: str) -> bool:
+    regex = "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}-[0-9]{2}$"
+    date = str(date)
+    if re.search(regex, date):
+        return True
+    else:
+        return False
 
 
 def check_int(**kwargs):

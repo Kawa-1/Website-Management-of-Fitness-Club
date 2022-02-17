@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from myapplication.models import Users, Activities
 from myapplication import db
 from myapplication.api.auth.auth import check_email, token_required
-from myapplication.api.instructors.helpers import check_int
+from myapplication.api.instructors.helpers import check_int, check_date_activities
 
 timestamp = str(datetime.utcnow())
 
@@ -137,13 +137,26 @@ class InstructorsApi(Resource):
         facility_id = request.form.get('facility_id')
         #price_id = request.form.get('price_id')
 
-        check = check_int(type_of_service_id=type_of_service_id, instructor_id=instructor_id, facility_id=facility_id)
-
-        if check[0] is False:
+        if not check_date_activities(date):
             err_resp = {
-                "message": {"description": "This", "name": "Bad type in form {}".format(check[1]),
+                "message": {"description": "Bad format of date {}".format(date), "name": "Format of date is improper",
                             "status": 400, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 400
+
+
+        check = check_int(type_of_service_id=type_of_service_id, facility_id=facility_id)
+
+        if check[0] is False:
+            try:
+                type_of_service_id = int(type_of_service_id)
+                facility_id = int(facility_id)
+            except Exception as e:
+                err_resp = {
+                    "message": {"description": "One of the fields couldn't be conversed "
+                                               "to int {}, {}".format(type_of_service_id, facility_id),
+                                "name": "Impossible conversion",
+                                "status": 400, "method": "PUT", "timestamp": timestamp}}
+                return err_resp, 400
 
         cmd = """SELECT t.name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
                 (SELECT city FROM fit.facilities WHERE %d=id), pr.price
