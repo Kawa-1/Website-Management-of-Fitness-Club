@@ -159,7 +159,7 @@ class InstructorsApi(Resource):
                 return err_resp, 400
 
         cmd = """SELECT t.name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
-                (SELECT city FROM fit.facilities WHERE %d=id), pr.price
+                (SELECT city FROM fit.facilities WHERE %d=id), pr.price, pr.id
                 FROM fit.types_of_services t 
                 INNER JOIN fit.price_list pr ON pr.service_id=%d 
                 WHERE %d=t.id""" % (g.user.id, facility_id, type_of_service_id, type_of_service_id)
@@ -174,7 +174,7 @@ class InstructorsApi(Resource):
             return err_resp, 404
 
         new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
-                                  facility_id=facility_id, price_id=price_id)
+                                  facility_id=facility_id, price_id=res[4])
 
         db.session.add(new_activity)
         db.session.commit()
