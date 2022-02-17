@@ -4,6 +4,7 @@ from myapplication.api.auth.auth import token_required
 from myapplication import db
 from datetime import datetime
 from myapplication.api.instructors.api import check_int
+from myapplication.models import Participation
 
 timestamp = str(datetime.utcnow())
 
