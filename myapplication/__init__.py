@@ -104,25 +104,25 @@ def create_app():
 
     #TODO: after_requst function which is not in this function, namespace...
 
-    # @app.after_request
-    # def header_after_request(response):
-    #     response.headers["yo"] = "XDDD"
-    #     http_origin = request.environ.get('HTTP_ORIGIN', None)
-    #     http_access_control_request_headers = request.environ.get(
-    #         'HTTP_ACCESS_CONTROL_REQUEST_HEADERS',
-    #         None
-    #     )
-    #     if http_origin and re.search(r'^[a-zA-Z0-9\-\_\/\:\.]+$', http_origin, re.DOTALL):
-    #         response.headers['Content-Type'] = "application/json"
-    #         response.headers['Access-Control-Allow-Origin'] = http_origin
-    #         response.headers['Access-Control-Allow-Credentials'] = "true"
-    #         response.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    #         response.headers[
-    #             'Access-Control-Expose-Headers'] = "*, Content-Disposition, Content-Length, X-Uncompressed-Content-Length"
-    #         if http_access_control_request_headers:
-    #             response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
-    #     return response
-    #
+    @app.after_request
+    def header_after_request(response):
+        response.headers["yo"] = "XDDD"
+        http_origin = request.environ.get('HTTP_ORIGIN', None)
+        http_access_control_request_headers = request.environ.get(
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS',
+            None
+        )
+        if http_origin and re.search(r'^[a-zA-Z0-9\-\_\/\:\.]+$', http_origin, re.DOTALL):
+            response.headers['Content-Type'] = "application/json"
+            response.headers['Access-Control-Allow-Origin'] = http_origin
+            response.headers['Access-Control-Allow-Credentials'] = "true"
+            response.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            response.headers[
+                'Access-Control-Expose-Headers'] = "*, Content-Disposition, Content-Length, X-Uncompressed-Content-Length"
+            if http_access_control_request_headers:
+                response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
+        return response
+
     # @app.before_first_request
     # def service_names_activities_names(TypesOfServices=TypesOfServices):
     #     yoga = TypesOfServices(name_of_service='yoga')
