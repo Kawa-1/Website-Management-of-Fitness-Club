@@ -72,7 +72,7 @@ class ValidateUserSubscription(Resource):
 
         resp = {"message": {"description": "Valid subscriptions returned",
                                    "method": "POST", "name": "valid subscriptions by user", "status": 200,
-                                   "timestamp": timestamp}
+                                   "timestamp": timestamp},
                 "subscriptions": []}
 
         for sub in user_valid_subs:
