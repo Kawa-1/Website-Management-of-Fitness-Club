@@ -104,120 +104,120 @@ def create_app():
 
     #TODO: after_requst function which is not in this function, namespace...
 
-    @app.after_request
-    def header_after_request(response):
-        response.headers["yo"] = "XDDD"
-        http_origin = request.environ.get('HTTP_ORIGIN', None)
-        http_access_control_request_headers = request.environ.get(
-            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS',
-            None
-        )
-        if http_origin and re.search(r'^[a-zA-Z0-9\-\_\/\:\.]+$', http_origin, re.DOTALL):
-            response.headers['Content-Type'] = "application/json"
-            response.headers['Access-Control-Allow-Origin'] = http_origin
-            response.headers['Access-Control-Allow-Credentials'] = "true"
-            response.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            response.headers[
-                'Access-Control-Expose-Headers'] = "*, Content-Disposition, Content-Length, X-Uncompressed-Content-Length"
-            if http_access_control_request_headers:
-                response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
-        return response
-
-    @app.before_first_request
-    def service_names_activities_names(TypesOfServices=TypesOfServices):
-        yoga = TypesOfServices(name_of_service='yoga')
-        crossfit = TypesOfServices(name_of_service='crossfit')
-        abs = TypesOfServices(name_of_service='abs')
-        pilates = TypesOfServices(name_of_service='pilates')
-        aerobic = TypesOfServices(name_of_service='aerobic')
-        ems = TypesOfServices(name_of_service='ems')
-        stretching = TypesOfServices(name_of_service='stretching')
-        box = TypesOfServices(name_of_service='box')
-        pass_1d = TypesOfServices(name_of_service='pass_1d', is_subscription=1)
-        pass_30d = TypesOfServices(name_of_service='pass_30d', is_subscription=1)
-        pass_1yr = TypesOfServices(name_of_service='pass_1yr', is_subscription=1)
-        db.session.add(yoga)
-        db.session.add(crossfit)
-        db.session.add(abs)
-        db.session.add(pilates)
-        db.session.add(aerobic)
-        db.session.add(ems)
-        db.session.add(stretching)
-        db.session.add(box)
-        db.session.add(pass_1d)
-        db.session.add(pass_30d)
-        db.session.add(pass_1yr)
-
-        db.session.commit()
-
-    @app.before_first_request
-    def facilities(Facilities=Facilities):
-        facility_1 = Facilities(city="Cracow", street="Obi-Wan-Kenobi", house_number=72, postcode="30-110",
-                                contact_number=999999999,
-                                email="fitness-cracow@fitness.com")
-        facility_2 = Facilities(city="Warsaw", street="Aragorn", house_number=12, postcode="00-921",
-                                contact_number=911131111,
-                                email="fitness-warsaw@fitness.com")
-        facility_3 = Facilities(city="Gdansk", street="Geralt", house_number=10, postcode="10-531",
-                                contact_number=310131770,
-                                email="fitness-gdansk@fitness.com")
-        db.session.add(facility_1)
-        db.session.add(facility_2)
-        db.session.add(facility_3)
-
-        db.session.commit()
-        print('done')
-
-    @app.before_first_request
-    def prices(PriceList=PriceList):
-        yoga = PriceList(price=30, service_id=1)
-        crossfit = PriceList(price=50, service_id=2)
-        abs = PriceList(price=35, service_id=3)
-        pilates = PriceList(price=60, service_id=4)
-        aerobic = PriceList(price=33, service_id=5)
-        ems = PriceList(price=80, service_id=6)
-        stretching = PriceList(price=30, service_id=7)
-        box = PriceList(price=70, service_id=8)
-        pass_1d = PriceList(price=50, service_id=9)
-        pass_30d = PriceList(price=900, service_id=10)
-        pass_1yr = PriceList(price=3600, service_id=11)
-
-        db.session.add(yoga)
-        db.session.add(crossfit)
-        db.session.add(abs)
-        db.session.add(pilates)
-        db.session.add(aerobic)
-        db.session.add(ems)
-        db.session.add(stretching)
-        db.session.add(box)
-        db.session.add(pass_1d)
-        db.session.add(pass_30d)
-        db.session.add(pass_1yr)
-
-        db.session.commit()
-        print('done')
-
-    @app.before_first_request
-    def instructors(Users=Users):
-        password = generate_password_hash('123456789')
-        instructor_1 = Users(first_name="Jacek", last_name="Soplica", city="Cracow", street="Reymont", house_number=10,
-                             postcode="31-100", email='jacek@onet.com', password=password, is_instructor=1, confirmed=1)
-        instructor_2 = Users(first_name="Ksiądz", last_name="Robak", city="Warsaw", street="Gdanska", house_number=53,
-                             postcode="00-120", email='robak@onet.com', password=password, is_instructor=1, confirmed=1)
-        instructor_3 = Users(first_name="Grzegorz", last_name="Brzęczyszczykiewicz", city="Trzebrzeszyn",
-                             street="Szczedrzykowska",
-                             house_number=99, postcode="10-333", email='szcz@onet.com', password=password,
-                             is_instructor=1, confirmed=1)
-        instructor_4 = Users(first_name="Franek", last_name="Dolas", city="Wroclove", street="fabryczna",
-                             house_number=38,
-                             postcode="21-921", email='dolas@onet.com', password=password, is_instructor=1, confirmed=1)
-        db.session.add(instructor_1)
-        db.session.add(instructor_2)
-        db.session.add(instructor_3)
-        db.session.add(instructor_4)
-
-        db.session.commit()
-        print('done')
+    # @app.after_request
+    # def header_after_request(response):
+    #     response.headers["yo"] = "XDDD"
+    #     http_origin = request.environ.get('HTTP_ORIGIN', None)
+    #     http_access_control_request_headers = request.environ.get(
+    #         'HTTP_ACCESS_CONTROL_REQUEST_HEADERS',
+    #         None
+    #     )
+    #     if http_origin and re.search(r'^[a-zA-Z0-9\-\_\/\:\.]+$', http_origin, re.DOTALL):
+    #         response.headers['Content-Type'] = "application/json"
+    #         response.headers['Access-Control-Allow-Origin'] = http_origin
+    #         response.headers['Access-Control-Allow-Credentials'] = "true"
+    #         response.headers['Access-Control-Allow-Methods'] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    #         response.headers[
+    #             'Access-Control-Expose-Headers'] = "*, Content-Disposition, Content-Length, X-Uncompressed-Content-Length"
+    #         if http_access_control_request_headers:
+    #             response.headers['Access-Control-Allow-Headers'] = http_access_control_request_headers
+    #     return response
+    #
+    # @app.before_first_request
+    # def service_names_activities_names(TypesOfServices=TypesOfServices):
+    #     yoga = TypesOfServices(name_of_service='yoga')
+    #     crossfit = TypesOfServices(name_of_service='crossfit')
+    #     abs = TypesOfServices(name_of_service='abs')
+    #     pilates = TypesOfServices(name_of_service='pilates')
+    #     aerobic = TypesOfServices(name_of_service='aerobic')
+    #     ems = TypesOfServices(name_of_service='ems')
+    #     stretching = TypesOfServices(name_of_service='stretching')
+    #     box = TypesOfServices(name_of_service='box')
+    #     pass_1d = TypesOfServices(name_of_service='pass_1d', is_subscription=1)
+    #     pass_30d = TypesOfServices(name_of_service='pass_30d', is_subscription=1)
+    #     pass_1yr = TypesOfServices(name_of_service='pass_1yr', is_subscription=1)
+    #     db.session.add(yoga)
+    #     db.session.add(crossfit)
+    #     db.session.add(abs)
+    #     db.session.add(pilates)
+    #     db.session.add(aerobic)
+    #     db.session.add(ems)
+    #     db.session.add(stretching)
+    #     db.session.add(box)
+    #     db.session.add(pass_1d)
+    #     db.session.add(pass_30d)
+    #     db.session.add(pass_1yr)
+    #
+    #     db.session.commit()
+    #
+    # @app.before_first_request
+    # def facilities(Facilities=Facilities):
+    #     facility_1 = Facilities(city="Cracow", street="Obi-Wan-Kenobi", house_number=72, postcode="30-110",
+    #                             contact_number=999999999,
+    #                             email="fitness-cracow@fitness.com")
+    #     facility_2 = Facilities(city="Warsaw", street="Aragorn", house_number=12, postcode="00-921",
+    #                             contact_number=911131111,
+    #                             email="fitness-warsaw@fitness.com")
+    #     facility_3 = Facilities(city="Gdansk", street="Geralt", house_number=10, postcode="10-531",
+    #                             contact_number=310131770,
+    #                             email="fitness-gdansk@fitness.com")
+    #     db.session.add(facility_1)
+    #     db.session.add(facility_2)
+    #     db.session.add(facility_3)
+    #
+    #     db.session.commit()
+    #     print('done')
+    #
+    # @app.before_first_request
+    # def prices(PriceList=PriceList):
+    #     yoga = PriceList(price=30, service_id=1)
+    #     crossfit = PriceList(price=50, service_id=2)
+    #     abs = PriceList(price=35, service_id=3)
+    #     pilates = PriceList(price=60, service_id=4)
+    #     aerobic = PriceList(price=33, service_id=5)
+    #     ems = PriceList(price=80, service_id=6)
+    #     stretching = PriceList(price=30, service_id=7)
+    #     box = PriceList(price=70, service_id=8)
+    #     pass_1d = PriceList(price=50, service_id=9)
+    #     pass_30d = PriceList(price=900, service_id=10)
+    #     pass_1yr = PriceList(price=3600, service_id=11)
+    #
+    #     db.session.add(yoga)
+    #     db.session.add(crossfit)
+    #     db.session.add(abs)
+    #     db.session.add(pilates)
+    #     db.session.add(aerobic)
+    #     db.session.add(ems)
+    #     db.session.add(stretching)
+    #     db.session.add(box)
+    #     db.session.add(pass_1d)
+    #     db.session.add(pass_30d)
+    #     db.session.add(pass_1yr)
+    #
+    #     db.session.commit()
+    #     print('done')
+    #
+    # @app.before_first_request
+    # def instructors(Users=Users):
+    #     password = generate_password_hash('123456789')
+    #     instructor_1 = Users(first_name="Jacek", last_name="Soplica", city="Cracow", street="Reymont", house_number=10,
+    #                          postcode="31-100", email='jacek@onet.com', password=password, is_instructor=1, confirmed=1)
+    #     instructor_2 = Users(first_name="Ksiądz", last_name="Robak", city="Warsaw", street="Gdanska", house_number=53,
+    #                          postcode="00-120", email='robak@onet.com', password=password, is_instructor=1, confirmed=1)
+    #     instructor_3 = Users(first_name="Grzegorz", last_name="Brzęczyszczykiewicz", city="Trzebrzeszyn",
+    #                          street="Szczedrzykowska",
+    #                          house_number=99, postcode="10-333", email='szcz@onet.com', password=password,
+    #                          is_instructor=1, confirmed=1)
+    #     instructor_4 = Users(first_name="Franek", last_name="Dolas", city="Wroclove", street="fabryczna",
+    #                          house_number=38,
+    #                          postcode="21-921", email='dolas@onet.com', password=password, is_instructor=1, confirmed=1)
+    #     db.session.add(instructor_1)
+    #     db.session.add(instructor_2)
+    #     db.session.add(instructor_3)
+    #     db.session.add(instructor_4)
+    #
+    #     db.session.commit()
+    #     print('done')
 
     @app.route('/', methods=['GET'])
     def hello():
