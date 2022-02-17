@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { FormGroup, FormControl, Validators} from '@angular/forms'; 
 import { CookieService } from 'ngx-cookie-service';
 import { ToastrService } from 'ngx-toastr';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-activities',
@@ -28,30 +29,45 @@ export class ActivitiesComponent implements OnInit {
   public instructors$: any = [];
   public facilities$: any = [];
   public activities$: any = [];
-  public user_id:any;
-  public usersUsername:any = "";
-  public test: any;
+  public user_id: any;
+  public usersUsername: any = "";
+  public price_id: any;
+  public hours$: any = [];
+  public minutes$ = [0, 15, 30, 45];
       
-  form1 = new FormGroup({  
-    instructor: new FormControl('', Validators.required)  
-  }); 
+  // form1 = new FormGroup({  
+  //   instructor: new FormControl('', Validators.required)  
+  // }); 
 
-  form2 = new FormGroup({  
+  form1 = new FormGroup({  
     activity: new FormControl('', Validators.required)  
   });
 
-  form3 = new FormGroup({  
+  form2 = new FormGroup({  
     facility: new FormControl('', Validators.required)  
+  });
+
+  form3 = new FormGroup({  
+    hour: new FormControl('', Validators.required)  
+  });
+
+  form4 = new FormGroup({  
+    minute: new FormControl('', Validators.required)  
   });
 
   constructor(
     private auth: AuthService,
     private cookieService: CookieService, 
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private datepipe: DatePipe,
   ){
   }
 
   ngOnInit(): void {
+    for (let i = 12; i < 21; i++) {
+      this.hours$.push(i)
+    }
+
     const token = this.cookieService.get('token');
     if (token){
       this.auth.ensureAuthenticated(token)
@@ -97,19 +113,40 @@ export class ActivitiesComponent implements OnInit {
   }
 
   addActivity(): void{
-    console.log(this.datePick);
-    console.log(this.form1.value.instructor)
-    console.log(this.form2.value.activity)
-    console.log(this.form3.value.facility)
+    if(this.form1.value.activity != "" && this.form2.value.facility != ""  && this.form3.value.hour != "" && this.form4.value.minute != ""){
+      var array1 = this.form1.value.activity.split('.');
+      var activity_id: number = +array1[0];
 
-    var array = this.form2.value.activity.split('.');
-    array[1] = array[1].substring(1);
+      this.auth.getPrice(activity_id).then(
+        data=>{
+          this.price_id = data.price_service[0].price_id;
+        }
+      )
 
-    this.auth.getPrice(array[0]).then(
-      data=>{
-        console.log(data)
-      }
-    )
+      var array2 = this.form2.value.facility.split('.');
+      var facility_id: number = +array2[0];
+
+      var formData: any = new FormData();
+
+      this.datePick.setHours(this.form3.value.hour, this.form4.value.minute)
+      let latest_date =this.datepipe.transform(this.datePick, 'yyyy-MM-dd hh-mm');
+
+      formData.append("date", latest_date);
+      formData.append("type_of_service_id", activity_id);
+      formData.append("facility_id", facility_id);
+      formData.append("price_id", this.price_id);
+
+      this.auth.addActivity(formData).subscribe(
+        data => {
+            this.toastr.success('Added activity');
+        }
+      );
+
+      formData.delete("date");
+      formData.delete("type_of_service_id");
+      formData.delete("facility_id");
+      formData.delete("price_id");
+    }
   }
 
   goBack(): void {

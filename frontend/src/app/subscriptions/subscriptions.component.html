@@ -35,7 +35,7 @@
             </div>
         </form>
         <br>
-        <button class="btn btn-primary" id="button2" (click)="buy1()">Buy 1 day subscription</button>   
+        <button [disabled]="!isLoggedIn || isInstructor" class="btn btn-primary" id="button2" (click)="buy1()">Buy 1 day subscription</button>   
         <br>
     </div>
     <br>
@@ -69,7 +69,7 @@
             </div>
         </form>
         <br>
-        <button class="btn btn-primary" id="button2" (click)="buy2()">Buy 30 days subscription</button>     
+        <button [disabled]="!isLoggedIn || isInstructor" class="btn btn-primary" id="button2" (click)="buy2()">Buy 30 days subscription</button>     
         <br>
     </div>
     <br>
@@ -103,7 +103,7 @@
             </div>
         </form>
         <br>
-        <button class="btn btn-primary" id="button2" (click)="buy3()">Buy 1 year subscription</button>   
+        <button [disabled]="!isLoggedIn || isInstructor" class="btn btn-primary" id="button2" (click)="buy3()">Buy 1 year subscription</button>   
         <br>
     </div>
 </div>

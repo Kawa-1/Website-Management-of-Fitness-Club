@@ -1,31 +1,8 @@
-/* .nav-repair{
-    padding-left: 44.39%;
-  }
-.form-stuff{
-    padding-top: 30px;
-    padding-right: 700px;
-    padding-left: 700px;
-}
-
-.form-group{
-    padding-bottom: 15px;   
-}
-
-.show-stuff{
-    padding-right: 600px;
-    padding-left: 600px;
+.parent {
     text-align: left;
-    font-size: 120%;
+  }
+.child {
+    display: inline-block;
+    vertical-align: left;
 }
-
-.recaptcha-style{
-    padding-top: 20px;
-    padding-left: 100px;
-}
-
-.searchBar{
-    color:black;
-    width: 300px;
-} */
-
   

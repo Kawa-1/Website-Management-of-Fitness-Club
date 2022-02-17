@@ -10,6 +10,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { TimepickerModule } from 'ngx-bootstrap/timepicker';
+import { DatePipe } from '@angular/common'
 
 
 import { RegisterComponent } from './register/register.component';
@@ -22,7 +23,6 @@ import { YourProfileComponent } from './your-profile/your-profile.component';
 import { ActivitiesComponent } from './activities/activities.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 import { AuthInterceptor } from './services/auth.interceptor';
-import { DatePipe } from '@angular/common'
 
 @NgModule({
   declarations: [

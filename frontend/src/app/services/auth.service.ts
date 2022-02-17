@@ -84,4 +84,9 @@ export class AuthService {
     let url: string = this.path + `/start_subscription`;
     return this.http.post(url, sub).toPromise();
   }
+
+  addActivity(form:FormData) {
+    let url: string = this.path + "/instructors";
+    return this.http.put(url, form)
+  }
 }

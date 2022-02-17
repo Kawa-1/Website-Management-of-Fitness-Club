@@ -44,7 +44,7 @@
         </div>
         <div class="form-group">
             <div class="input-field">
-            <input required minlength="6" maxlength="7" ngModel name="postcode" #postcode="ngModel" type="text" id="postcode" class="form-control validate" placeholder="Postcode" >
+            <input required minlength="6" maxlength="6" ngModel name="postcode" #postcode="ngModel" type="text" id="postcode" class="form-control validate" placeholder="Postcode" >
             <label for="postcode" [attr.data-error]="postcode.errors != null?(postcode.errors.required? 'Required Field' :'Proper postcode required'):''"></label>
             </div>
         </div>

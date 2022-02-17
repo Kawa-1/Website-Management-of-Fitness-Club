@@ -1,3 +1,5 @@
+import { CookieService } from 'ngx-cookie-service';
+import { ToastrService } from 'ngx-toastr';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { AuthService } from '../services/auth.service';
@@ -34,10 +36,16 @@ export class SubscriptionsComponent implements OnInit {
   public minDate = new Date();
   public maxDate = new Date();
   public facilities$: any[] = [];
-
   public gotData: boolean = false;
+  public isLoggedIn: boolean = false;
+  public isInstructor: boolean = false;
 
-  constructor( private auth: AuthService, private datepipe: DatePipe ) { }
+  constructor(
+    private auth: AuthService, 
+    private datepipe: DatePipe,
+    private toastr: ToastrService,
+    private cookieService: CookieService
+  ) { }
 
   form1 = new FormGroup({  
     facility: new FormControl('', Validators.required)  
@@ -53,6 +61,25 @@ export class SubscriptionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.maxDate.setDate( this.maxDate.getDate() + 90 );
+
+    const token = this.cookieService.get('token');
+    if (token){
+      this.auth.ensureAuthenticated(token)
+      .then((user) => {
+        console.log(user)
+        if (user.message.status === 200) {
+          this.isLoggedIn = true;
+          // this.user_id = user.user.user_id;
+          if (user.user.is_instructor === 1){
+            this.isInstructor = true
+          }
+        }
+      })
+      .catch((err) => {
+      });
+    }
+    else{
+    }
 
     this.auth.getFacilities().then(
       data => {
@@ -100,11 +127,11 @@ export class SubscriptionsComponent implements OnInit {
     var array = this.form1.value.facility.split('.');
     var aux: number = +array[0];
     sub.facility_id = aux;
+
     this.auth.startSubscription(sub)
-    .then((data) => {
-      console.log(data)
+    .then((msg) => {
+      this.toastr.success(msg.message.description);
     })
-    console.log(sub.facility_id)
   }
 
   buy2(): void{
@@ -115,8 +142,13 @@ export class SubscriptionsComponent implements OnInit {
     sub.start_date = date;
 
     var array = this.form1.value.facility.split('.');
-    sub.facility_id = array[0];
-    console.log(sub.facility_id)
+    var aux: number = +array[0];
+    sub.facility_id = aux;
+
+    this.auth.startSubscription(sub)
+    .then((msg) => {
+      this.toastr.success(msg.message.description);
+    })
   }
 
   buy3(): void{
@@ -127,7 +159,12 @@ export class SubscriptionsComponent implements OnInit {
     sub.start_date = date;
 
     var array = this.form1.value.facility.split('.');
-    sub.facility_id = array[0];
-    console.log(sub.facility_id)
+    var aux: number = +array[0];
+    sub.facility_id = aux;
+
+    this.auth.startSubscription(sub)
+    .then((msg) => {
+      this.toastr.success(msg.message.description);
+    })
   }
 }

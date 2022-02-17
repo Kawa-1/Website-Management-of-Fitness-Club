@@ -27,7 +27,7 @@
         </div>
         <br>
         
-        <form [formGroup]="form1">  
+        <!-- <form [formGroup]="form1">  
             <div class="form-group">  
                 <label for="instructor">Instructor:</label>  
                 <select formControlName="instructor" class="form-control">  
@@ -35,27 +35,47 @@
                     <option *ngFor="let instructor of instructors$"> {{instructor.first_name}} {{instructor.last_name}}</option>  
                 </select>  
             </div>  
-        </form>
+        </form> -->
         <br>
-    
-        <timepicker [(ngModel)]="datePick"></timepicker>
 
-        <form [formGroup]="form2">  
+        <label for="time">Choose time:</label>
+
+        <div class="parent">
+            <form [formGroup]="form3" class="child">  
+                <div class="form-group">  
+                    <select formControlName="hour" class="form-control">  
+                        <option>Choose hour</option>  
+                        <option *ngFor="let hour of hours$">{{hour}} </option>  
+                    </select>  
+                </div>
+            </form>
+
+            <form [formGroup]="form4" class="child">  
+                <div class="form-group">  
+                    <select formControlName="minute" class="form-control">  
+                        <option>Choose minutes</option>  
+                        <option *ngFor="let minute of minutes$">{{minute}} </option>  
+                    </select>  
+                </div>
+            </form>
+        </div>
+    
+        <form [formGroup]="form1">  
             <div class="form-group">  
                 <label for="activity">Activity:</label>  
                 <select formControlName="activity" class="form-control">  
                     <option>Choose activity</option>  
-                    <option *ngFor="let activity of activities$"> {{activity.id}}. {{activity.name_of_service}} </option>  
+                    <option *ngFor="let activity of activities$">{{activity.id}}. {{activity.name_of_service}} </option>  
                 </select>  
             </div>
         </form>
         <br>
-        <form [formGroup]="form3">  
+        <form [formGroup]="form2">  
             <div class="form-group">  
                 <label for="facility">Facility:</label>  
                 <select formControlName="facility" class="form-control">  
                     <option>Choose facility</option>  
-                    <option *ngFor="let facility of facilities$"> {{facility.city}} </option>  
+                    <option *ngFor="let facility of facilities$">{{facility.id}}. {{facility.city}} </option>  
                 </select>  
             </div>
         </form>
