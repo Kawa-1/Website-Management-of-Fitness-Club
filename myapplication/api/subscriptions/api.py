@@ -126,7 +126,7 @@ class StartSubscription(Resource):
 class UserOnSubscription(Resource):
     @token_required
     def get(self):
-        cmd = """SELECT s.start_date, s.end_date, t.name_of_service, f.city, f.street, f.postcode, pr.price
+        cmd = """SELECT s.start_date, s.end_date, t.name_of_service, f.city, f.street, f.postcode, pr.price, s.id 
                 FROM fit.subscriptions s
                 INNER JOIN fit.types_of_services t ON s.service_id=t.id
                 INNER JOIN fit.facilities f ON s.facility_id=f.id
@@ -148,6 +148,6 @@ class UserOnSubscription(Resource):
                                   "method": "GET", "timestamp": timestamp}, "subscriptions": []}
         for sub in subscriptions:
             resp["subscriptions"].append({"start_date": sub[0], "end_date": sub[1], "name_of_service": sub[2], "city": sub[3],
-                                          "street": sub[4], "postcode": sub[5], "price": sub[6]})
+                                          "street": sub[4], "postcode": sub[5], "price": sub[6], "id": sub[7]})
 
         return resp, 200

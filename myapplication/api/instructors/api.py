@@ -184,7 +184,7 @@ class InstructorsApi(Resource):
                             "name": "Activity added",
                             "status": 201, "method": "POST", "timestamp": timestamp},
                 "activity": {"date": date, "name_of_service": res[0], "email_instructor": res[1], "city": res[2],
-                             "price": res[3]}}
+                             "price": res[3], "id": res[4]}}
         return resp, 201
 
 

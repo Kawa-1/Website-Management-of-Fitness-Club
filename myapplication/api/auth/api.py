@@ -45,6 +45,45 @@ class UserApi(Resource):
         # return g.user
 
 
+class ValidateUserSubscription(Resource):
+    @token_required
+    def post(self):
+        """Validating date based on date posted in body .e.g.
+        {"date": %Y-%m-%d}
+        """
+        post_data = request.get_json()
+        date_then = post_data.get('date')
+
+        cmd = """SELECT s.id, s.start_date, s.end_date, t.name_of_service, f.city, f.street, f.house_number, pr.price
+                FROM fit.subscriptions s
+                INNER JOIN fit.types_of_services t ON s.service_id=t.id
+                INNER JOIN fit.facilities f ON s.facility_id=f.id
+                INNER JOIN fit.price_list pr ON s.price_id=pr.id
+                WHERE \'%s\' BETWEEN s.start_date AND s.end_date AND s.user_id=%d
+                ORDER BY s.start_date DESC""" % (date_then, g.user.id)
+
+        user_valid_subs = db.session.execute(cmd).cursor.fetchall()
+
+        if len(user_valid_subs) == 0:
+            err = {"message": {"description": "User has no valid subscriptions right now",
+                                   "method": "POST", "name": "Lack of subscriptions", "status": 204,
+                                   "timestamp": timestamp}}
+            return err_resp, 204
+
+        resp = {"message": {"description": "Valid subscriptions returned",
+                                   "method": "POST", "name": "valid subscriptions by user", "status": 200,
+                                   "timestamp": timestamp}
+                "subscriptions": []}
+
+        for sub in user_valid_subs:
+            resp["subscriptions"].append({"id": resp[0], "start_date": resp[1], "end_date": resp[2], "name_of_service": resp[3],
+                                          "city": resp[4], "street": resp[5], "house_number": resp[6], "price": resp[7]})
+
+        return resp, 200
+
+
+
+
 class RegisterUserApi(Resource):
     def post(self):
         first_name = request.form.get("first_name")
@@ -66,13 +105,13 @@ class RegisterUserApi(Resource):
 
         if not first_name or not last_name or not city or not street or not house_number or not postcode or not email or\
             not password or not repeat_password:
-            err_resp = {"errors": {"description": "One of the fields has not been provided",
+            err_resp = {"message": {"description": "One of the fields has not been provided",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
             return err_resp, 400
 
         if check_email(email) is False:
-            err_resp = {"errors": {"description": "Format of email is incorrect",
+            err_resp = {"message": {"description": "Format of email is incorrect",
                                     "method": "POST", "name": "Failed registration", "status": 400,
                                     "timestamp": timestamp}}
             return err_resp, 400
@@ -85,25 +124,25 @@ class RegisterUserApi(Resource):
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
-            err_resp = {"errors": {"description": "Provided empty field, bad semantics, something exists so far etc.",
+            err_resp = {"message": {"description": "Provided empty field, bad semantics, something exists so far etc.",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
             return err_resp, 400
 
         if check_postcode(postcode) is False:
-            err_resp = {"errors": {"description": "Check postcode failed",
+            err_resp = {"message": {"description": "Check postcode failed",
                         "method": "POST", "name": "Failed registration", "status": 400,
                         "timestamp": timestamp}}
             return err_resp, 400
 
         if password != repeat_password:
-            err_resp = {"errors": {"description": "Passwords are not correct",
+            err_resp = {"message": {"description": "Passwords are not correct",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
             return err_resp, 400
 
         if check_number(house_number) is False:
-            err_resp = {"errors": {"description": "Check house number failed",
+            err_resp = {"message": {"description": "Check house number failed",
                                    "method": "POST", "name": "Failed registration", "status": 400,
                                    "timestamp": timestamp}}
             return err_resp, 400

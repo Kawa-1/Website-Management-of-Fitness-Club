@@ -25,7 +25,7 @@ class UserActivityApi(Resource):
         #             GROUP BY a.id
         #             ORDER BY a.date DESC;""" % user_id
         cmd = """SELECT t.name_of_service, a.date, u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, 
-                    (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=a.id GROUP BY p.activity_id), a.id, pr.price
+                    (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=a.id GROUP BY p.activity_id) as sum_of_users, a.id, pr.price
                     FROM fit.activities a 
                     INNER JOIN fit.users u ON a.instructor_id=u.id AND a.instructor_id=1 
                     INNER JOIN fit.facilities f ON a.facility_id=f.id 

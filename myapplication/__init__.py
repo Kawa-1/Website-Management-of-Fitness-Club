@@ -96,6 +96,9 @@ def create_app():
     from myapplication.api.price_list.api import PriceOnService
     api.add_resource(PriceOnService, "/api/price_on_service/<int:service_id>", "/api/price_on_service")
 
+    from myapplication.api.auth.api import ValidateUserSubscription
+    api.add_resource(ValidateUserSubscription, "/api/user_valid_subscriptions")
+
     from myapplication.api.auth.api import Test
     api.add_resource(Test, "/test")
 
