@@ -23,4 +23,4 @@ def check_int(**kwargs):
         if not isinstance(val, int):
             return False, {key: val}
 
-    return True
+    return True, {}
