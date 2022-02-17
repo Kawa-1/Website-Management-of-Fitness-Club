@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from myapplication.models import Users, Activities
 from myapplication import db
 from myapplication.api.auth.auth import check_email, token_required
+from myapplication.api.instructors.helpers import check_int
 
 timestamp = str(datetime.utcnow())
 
@@ -134,11 +135,21 @@ class InstructorsApi(Resource):
         type_of_service_id = request.form.get('type_of_service_id')
         instructor_id = g.user.id
         facility_id = request.form.get('facility_id')
-        price_id = request.form.get('price_id')
+        #price_id = request.form.get('price_id')
 
-        cmd = """SELECT name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
-                (SELECT city FROM fit.facilities WHERE %d=id), (SELECT price FROM fit.price_list WHERE %d=id)
-                FROM fit.types_of_services WHERE %d=id""" % (g.user.id, facility_id, price_id, type_of_service_id)
+        check = check_int(type_of_service_id=type_of_service_id, instructor_id=instructor_id, facility_id=facility_id)
+
+        if check[0] is False:
+            err_resp = {
+                "message": {"description": "This", "name": "Bad type in form {}".format(check[1])
+                            "status": 400, "method": "PUT", "timestamp": timestamp}}
+            return err_resp, 400
+
+        cmd = """SELECT t.name_of_service, (SELECT email FROM fit.users WHERE %d=id), 
+                (SELECT city FROM fit.facilities WHERE %d=id), pr.price
+                FROM fit.types_of_services t 
+                INNER JOIN fit.price_list pr ON pr.service_id=%d 
+                WHERE %d=t.id""" % (g.user.id, facility_id, type_of_service_id, type_of_service_id)
         res = db.session.execute(cmd).cursor.fetchone()
 
         if res[0] is None or res[2] is None or res[3] is None:
