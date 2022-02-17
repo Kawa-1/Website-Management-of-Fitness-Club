@@ -53,7 +53,8 @@ class ActivityApi(Resource):
                     "status": 204, "name": "lack of activities", "method": "GET", "timestamp": timestamp}}
                 return resp, 204
 
-            dictionary = {"activities": []}
+            dictionary = {"message": {"description": "Activities returned", "name": "Activities returned", "status": 200,
+                                      "method": "GET", "timestamp": timestamp}, "activities": []}
             for obj in activity:
                 dictionary['activities'].append(
                     {"date": obj[0], 'type_of_service': obj[1], 'city': obj[2], 'street': obj[3],
@@ -61,7 +62,7 @@ class ActivityApi(Resource):
                      'last_name': obj[7], 'email': obj[8]})
 
             #dictionary['activities'] = sorted(dictionary['activities'], key=lambda i: i['date'], reverse=False)
-            dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
+            #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
             return dictionary, 200
 
         err_resp = {"errors": [{"description": "Provided bad format of date",
@@ -89,7 +90,7 @@ class ActivityApi(Resource):
                                 "timestamp": timestamp}}
             return resp, 204
 
-        dictionary = {"message": {"description": "Activities returned", "name": "Activities returned",
+        dictionary = {"message": {"description": "Activities returned", "name": "Activities returned", "status": 200,
                                   "method": "GET", "timestamp": timestamp}, "activities": []}
         for obj in activity:
             dictionary['activities'].append(

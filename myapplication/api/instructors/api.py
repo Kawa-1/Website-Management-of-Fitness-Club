@@ -152,6 +152,7 @@ class InstructorsApi(Resource):
                 WHERE %d=t.id""" % (g.user.id, facility_id, type_of_service_id, type_of_service_id)
         res = db.session.execute(cmd).cursor.fetchone()
 
+        print(res)
         if res[0] is None or res[2] is None or res[3] is None:
             err_resp = {
                 "message": {"description": "Such price, facility, or/and type_of_service doesn't/don't exist!",

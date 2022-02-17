@@ -123,3 +123,31 @@ class StartSubscription(Resource):
             return err_resp, 404
 
 
+class UserOnSubscription(Resource):
+    @token_required
+    def get(self):
+        cmd = """SELECT s.start_date, s.end_date, t.name_of_service, f.city, f.street, f.postcode, pr.price
+                FROM fit.subscriptions s
+                INNER JOIN fit.types_of_services t ON s.service_id=t.id
+                INNER JOIN fit.facilities f ON s.facility_id=f.id
+                INNER JOIN fit.price_list pr ON s.price_id=pr.id
+                WHERE s.user_id=%d
+                ORDER BY s.start_date DESC
+                """ % g.user.id
+
+        subscriptions = db.session.execute(cmd).cursor.fetchall()
+
+        if len(subscriptions) == 0:
+            resp = {"message": {
+                "description": "User has no subscriptions",
+                "status": 204, "name": "lack of subscriptions", "method": "GET",
+                "timestamp": timestamp}}
+            return resp, 204
+
+        resp = {"message": {"description": "Subscriptions made by user", "name": "Subscriptions returne", "status": 200,
+                                  "method": "GET", "timestamp": timestamp}, "subscriptions": []}
+        for sub in subscriptions:
+            resp["subscriptions"].append({"start_date": sub[0], "end_date": sub[1], "name_of_service": sub[2], "city": sub[3],
+                                          "street": sub[4], "postcode": sub[5], "price": sub[6]})
+
+        return resp, 200

@@ -3,6 +3,7 @@ from flask_restful import Resource
 from myapplication.api.auth.auth import token_required
 from myapplication import db
 from datetime import datetime
+from myapplication.api.instructors.api import check_int
 
 timestamp = str(datetime.utcnow())
 
@@ -62,6 +63,14 @@ class UserActivityApi(Resource):
                                     timestamp}}
             return err_resp, 400
 
+        check = check_int(activity_id=activity_id)
+
+        if check[0] is False:
+            err_resp = {
+                "message": {"description": "This", "name": "Bad type in form {}".format(check[1]),
+                            "status": 400, "method": "PUT", "timestamp": timestamp}}
+            return err_resp, 400
+
         cmd = "SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=%d" % activity_id
         number_of_users = db.session.execute(cmd).cursor.fetchone()
 
@@ -114,7 +123,8 @@ class UserActivityApi(Resource):
         return resp, 202
 
 
-class UsersOnParcipation(Resource):
+# TODO: it is already here higher, we are getting every single activity involved with user
+class UsersOnParticipation(Resource):
     @token_required
     def get(self):
             pass
