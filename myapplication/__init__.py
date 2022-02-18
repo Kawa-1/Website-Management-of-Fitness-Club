@@ -219,7 +219,7 @@ def create_app():
     #     db.session.commit()
     #     print('done')
 
-    from myapplication.api.facilities.helpers import limit_offset
+    from myapplication.global_helpers import limit_offset
     @app.route('/', methods=['GET'])
     @limit_offset
     def hello():
