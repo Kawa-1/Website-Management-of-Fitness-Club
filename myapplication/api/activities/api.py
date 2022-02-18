@@ -21,7 +21,7 @@ class ActivityApi(Resource):
         """
         Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         OR
-        We are able to pass parameter 'since_today' with value 1 (only 1 is processable) then we will get all activities since today
+        We are able to pass arg url parameter 'since_today' with value 1 (only 1 is processable) then we will get all activities since today
         Both parameters will result in bad request...
         if we are not passing any date parameter:
             then we will receive all activities from db
@@ -31,7 +31,7 @@ class ActivityApi(Resource):
             then we will receive all activities from the year of 2020
 
         NOTE: Return is sorted; from the oldest to the newest in case of date parameter,
-                                from the newest to the oldest in case of since_today parameter
+                                from the newest to the oldest in case of since_today arg url parameter
         """
         date: str
         since_today: int
@@ -39,6 +39,15 @@ class ActivityApi(Resource):
         since_today = request.args.get('since_today')
 
         if since_today is not None:
+            try:
+                since_today = int(since_today)
+            except Exception:
+                err_resp = {"message": {
+                    "description": "since_today was passed in improper format",
+                    "method": "GET", "name": "Failed obtaining activities",
+                    "status": 422, "timestamp": timestamp}}
+                return err_resp, 422
+
             if date is not None:
                 err_resp = {"message": {
                     "description": "It is not allowed to pass simultaneously parameter date and since_today",
