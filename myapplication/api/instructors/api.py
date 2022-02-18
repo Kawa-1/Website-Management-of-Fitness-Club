@@ -153,6 +153,7 @@ class InstructorsApi(Resource):
                             "status": 404, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 404
 
+        print("CHECK HERE: ", date)
         new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
                                   facility_id=facility_id, price_id=res[4])
 
