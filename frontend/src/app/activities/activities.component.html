@@ -89,7 +89,25 @@
 </div>
 <br><br>
 
-<div *ngFor="let activity of allActvities$">
+<div class="form-group">
+    <label for="datePickSearch">Date</label>
+    <input
+        id="datePickSearch" 
+        name="datePickSearch" 
+        bsDatepicker 
+        [(ngModel)]="datePickSearch" 
+        type="text" 
+        class="form-control" 
+        #dp="bsDatepicker"
+        [bsConfig]="{ dateInputFormat: 'DD - MM - YYYY' }"
+        [minDate]="minDate"
+        [maxDate]="maxDate" 
+        [daysDisabled]="[0]">
+</div>
+<button class="btn btn-primary" id="button1" (click)="search()">Search</button>
+<br><br>
+
+<div *ngFor="let activity of allActvities$ ">
     <div class="show-stuff">
         <p style="font-size: 140%;">{{activity.type_of_service}} </p>
         <p>Date: {{activity.date}} pm</p>

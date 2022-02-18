@@ -71,7 +71,12 @@ export class AuthService {
   }
 
   getActivities(): Promise<any>{
-    let url: string = this.path + "/activity_api";
+    let url: string = this.path + "/activity_api/?since_today=1";
+    return this.http.get(url).toPromise();
+  }
+
+  getDateActivities(date:any): Promise<any>{
+    let url: string = this.path + `/activity_api/${date}`;
     return this.http.get(url).toPromise();
   }
 

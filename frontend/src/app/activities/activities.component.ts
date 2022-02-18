@@ -26,6 +26,7 @@ export class ActivitiesComponent implements OnInit {
   public isDisabled = true;
   public openForm: boolean = true;
   public datePick = new Date();
+  public datePickSearch = new Date();
   public minDate = new Date();
   public maxDate = new Date();
   public instructors$: any = [];
@@ -67,6 +68,8 @@ export class ActivitiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.maxDate.setDate( this.maxDate.getDate() + 90 );
+
     for (let i = 13; i < 22; i++) {
       this.hours$.push(i)
     }
@@ -98,10 +101,19 @@ export class ActivitiesComponent implements OnInit {
     })
   }
 
+  search(): void{
+    let latest_date =this.datepipe.transform(this.datePickSearch, 'yyyy-MM-dd');
+
+    this.auth.getDateActivities(latest_date)
+    .then((data)=>{
+      this.allActvities$ = data.activities;
+    })
+  }
+
+
   openAdd(): void{
     this.openForm = false;
 
-    this.maxDate.setDate( this.maxDate.getDate() + 90 );
     this.auth.getInstructors().then(
       data => {
         this.instructors$ = data.instructors;
@@ -130,7 +142,7 @@ export class ActivitiesComponent implements OnInit {
       var formData: any = new FormData();
 
       this.datePick.setHours(this.form3.value.hour, this.form4.value.minute)
-      let latest_date =this.datepipe.transform(this.datePick, 'yyyy-MM-dd hh-mm');
+      let latest_date =this.datepipe.transform(this.datePick, 'yyyy-MM-dd HH-mm');
 
       formData.append("date", latest_date);
       formData.append("type_of_service_id", type_of_service_id);

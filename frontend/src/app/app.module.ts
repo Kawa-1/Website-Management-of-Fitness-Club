@@ -23,6 +23,8 @@ import { YourProfileComponent } from './your-profile/your-profile.component';
 import { ActivitiesComponent } from './activities/activities.component';
 import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { FilterPipe } from './services/filter.pipe';
+import { CarouselModule } from 'ngx-bootstrap/carousel';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
     YourProfileComponent,
     ActivitiesComponent,
     SubscriptionsComponent,
+    FilterPipe,
   ],
   imports: [
     FormsModule,
@@ -81,6 +84,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
     }),
     TimepickerModule.forRoot(),
     BsDatepickerModule.forRoot(),
+    CarouselModule.forRoot(),
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, DatePipe],
   bootstrap: [AppComponent]
