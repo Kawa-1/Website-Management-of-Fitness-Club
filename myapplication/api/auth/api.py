@@ -51,12 +51,13 @@ class UserApi(Resource):
 class ValidateUserSubscription(Resource):
     @token_required
     def post(self):
-        """Validating date based on date posted in body .e.g.
+        """
+        Validating date based on date posted in body e.g.
         {"date": '%Y-%m-%d'}
         """
         post_data = request.get_json()
         date_then = post_data.get('date')
-        date_then = clean(date_then)
+        #date_then = clean(date_then)
         check = valid_date_day(date_then)
         if check is False:
             err_resp = {"message": {"description": "Improper format of date",
@@ -89,7 +90,7 @@ class ValidateUserSubscription(Resource):
         for sub in user_valid_subs:
             resp["subscriptions"].append({"id": sub[0], "start_date": sub[1], "end_date": sub[2], "name_of_service": sub[3],
                                           "city": sub[4], "street": sub[5], "house_number": sub[6], "price": sub[7], "bool": 'True'})
-            
+
         return resp, 200
 
 
