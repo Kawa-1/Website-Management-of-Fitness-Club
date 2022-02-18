@@ -57,3 +57,21 @@ def valid_date_H_M(date: str) -> bool:
 
     except Exception:
         return False
+
+def valid_date_Y(date: str) -> bool:
+    month = 1
+    day = 1
+    try:
+        datetime(int(date), month, day)
+        return True
+    except Exception:
+        return False
+
+def valid_date_Y_m(date: str) -> bool:
+    day = 1
+    try:
+        year, month = date.split('-')
+        datetime(int(year), int(month))
+        return True
+    except Exception:
+        return False

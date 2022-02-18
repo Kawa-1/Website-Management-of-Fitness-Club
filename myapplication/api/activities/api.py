@@ -2,12 +2,12 @@ import jwt
 from flask_restful import Resource
 from flask import request, json, current_app, g
 from datetime import datetime
-from myapplication.api.activities.check import check_date_format, check_month_format, check_year_format
+from myapplication.api.activities.check import check_month_format, check_year_format
 from myapplication.api.auth.auth import token_required
 from myapplication import db
 from myapplication.models import Participation
 from myapplication.logger import get_logger
-from myapplication.global_helpers import limit_offset
+from myapplication.global_helpers import limit_offset, valid_date_day, valid_date_Y, valid_date_Y_m
 
 timestamp = str(datetime.utcnow())
 log = get_logger(__name__)
@@ -19,13 +19,13 @@ class ActivityApi(Resource):
     @limit_offset
     def get(self, date=None):
         """
-        Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
+        Date parameter should be passed like: Year-Month-Day e.g. 2021-02-09 (YYYY-MM-DD) then we will receive all acitivites during this day
         OR
         We are able to pass arg url parameter 'since_today' with value 1 (only 1 is processable) then we will get all activities since today
         Both parameters will result in bad request...
         if we are not passing any date parameter:
             then we will receive all activities from db
-        if we are passing date like: 2020_12:
+        if we are passing date like: 2020-12:
             then we will receive all activities from 2020's December
         if we are passing date like: 2020:
             then we will receive all activities from the year of 2020
@@ -95,7 +95,6 @@ class ActivityApi(Resource):
                 return err_resp, 422
 
 
-
         if date is None:
             cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email, 
                     (SELECT COUNT(p.id) FROM fit.participation p WHERE p.activity_id=a.id), a.id
@@ -126,8 +125,10 @@ class ActivityApi(Resource):
             #dictionary = json.dumps(dictionary, indent=4, sort_keys=True)
             return dictionary, 200
 
-        date = date.replace("_", "-")
-        if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
+
+        #date = date.replace("_", "-")
+        if (not valid_date_day(date) and not len(date) == 10) or (not valid_date_Y_m(date) and not len(date) == 7) or \
+                (not valid_date_Y(date) and not len(date) == 4):
             err_resp = {"message": {"description": "Provided bad format of date",
                                     "method": "GET", "name": "Failed obtaining activities", "status": 422,
                                     "timestamp": timestamp}}

@@ -118,9 +118,7 @@ class InstructorsApi(Resource):
         instructor_id = g.user.id
         facility_id = request.form.get('facility_id')
         #price_id = request.form.get('price_id')
-        print('1 ', date)
         date = clean(date)
-        print('2 ', date)
         if not valid_date_H_M(date):
             err_resp = {
                 "message": {"description": "Bad format of date", "name": "Format of date is improper",
@@ -156,7 +154,6 @@ class InstructorsApi(Resource):
                             "status": 404, "method": "PUT", "timestamp": timestamp}}
             return err_resp, 404
 
-        print("CHECK HERE: ", date)
         new_activity = Activities(date=date, type_of_service_id=type_of_service_id, instructor_id=g.user.id,
                                   facility_id=facility_id, price_id=res[4])
 
