@@ -127,11 +127,20 @@ class ActivityApi(Resource):
 
 
         #date = date.replace("_", "-")
-        if (not valid_date_day(date) and not len(date) == 10) or (not valid_date_Y_m(date) and not len(date) == 7) or \
-                (not valid_date_Y(date) and not len(date) == 4):
-            err_resp = {"message": {"description": "Provided bad format of date",
-                                    "method": "GET", "name": "Failed obtaining activities", "status": 422,
-                                    "timestamp": timestamp}}
+        err_resp = {"message": {"description": "Provided bad format of date",
+                                "method": "GET", "name": "Failed obtaining activities", "status": 422,
+                                "timestamp": timestamp}}
+        checked = False
+        if (valid_date_day(date) and len(date) == 10):
+            checked = True
+
+        if (valid_date_Y_m(date) and len(date) == 7):
+            checked = True
+
+        if (valid_date_Y(date) and len(date) == 4):
+            checked = True
+
+        if checked is False:
             return err_resp, 422
 
         cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email,
