@@ -66,7 +66,6 @@ export class SubscriptionsComponent implements OnInit {
     if (token){
       this.auth.ensureAuthenticated(token)
       .then((user) => {
-        console.log(user)
         if (user.message.status === 200) {
           this.isLoggedIn = true;
           // this.user_id = user.user.user_id;
@@ -141,7 +140,7 @@ export class SubscriptionsComponent implements OnInit {
     let date =this.datepipe.transform(this.datePick2, 'yyyy-MM-dd');
     sub.start_date = date;
 
-    var array = this.form1.value.facility.split('.');
+    var array = this.form2.value.facility.split('.');
     var aux: number = +array[0];
     sub.facility_id = aux;
 
@@ -158,7 +157,7 @@ export class SubscriptionsComponent implements OnInit {
     let date =this.datepipe.transform(this.datePick3, 'yyyy-MM-dd');
     sub.start_date = date;
 
-    var array = this.form1.value.facility.split('.');
+    var array = this.form3.value.facility.split('.');
     var aux: number = +array[0];
     sub.facility_id = aux;
 
