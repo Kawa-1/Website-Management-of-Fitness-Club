@@ -57,7 +57,7 @@ class ValidateUserSubscription(Resource):
         """
         post_data = request.get_json()
         date_then = post_data.get('date')
-        #date_then = clean(date_then)
+        date_then = clean(date_then)
         check = valid_date_day(date_then)
         if check is False:
             err_resp = {"message": {"description": "Improper format of date",
@@ -70,8 +70,9 @@ class ValidateUserSubscription(Resource):
                 INNER JOIN fit.types_of_services t ON s.service_id=t.id
                 INNER JOIN fit.facilities f ON s.facility_id=f.id
                 INNER JOIN fit.price_list pr ON s.price_id=pr.id
-                WHERE %s BETWEEN s.start_date AND s.end_date AND s.user_id=%d
+                WHERE \'%s\' BETWEEN s.start_date AND s.end_date AND s.user_id=%d
                 ORDER BY s.start_date DESC""" % (date_then, g.user.id)
+        print(cmd)
 
         user_valid_subs = db.session.execute(cmd).cursor.fetchall()
         print(user_valid_subs)
