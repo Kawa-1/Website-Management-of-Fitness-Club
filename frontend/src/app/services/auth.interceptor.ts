@@ -14,8 +14,9 @@ export class AuthInterceptor implements HttpInterceptor{
         if(req.url=="http://localhost:5000/api/logout" || 
            req.url=="http://localhost:5000/api/start_subscription" || 
            req.url=="http://localhost:5000/api/instructors" ||
-           req.url=="http://localhost:5000/api/user_activity" ||
-           req.url=="http://localhost:5000/api/user_valid_subscriptions"){
+           req.url.includes("http://localhost:5000/api/user_activity") ||
+           req.url=="http://localhost:5000/api/user_valid_subscriptions" ||
+           req.url=="http://localhost:5000/api/user_subscriptions"){
 
             let authToken = `Bearer ${this.cookieService.get('token')}`
             

@@ -14,6 +14,8 @@ export class YourProfileComponent implements OnInit {
   public isLoggedIn: boolean = false;
   public usersUsername:any = "";
   public user_id:any;
+  public activities$: any[] = [];
+  public subscriptions$: any[] = [];
 
   constructor(
     private auth: AuthService, 
@@ -42,19 +44,29 @@ export class YourProfileComponent implements OnInit {
 
     this.auth.getUserActivity().then(
       data=>{
-        console.log(data)
+        this.activities$ = data.activities;
       }
     )
 
     this.auth.getUserSubs().then(
       data=>{
-        console.log(data)
+        this.subscriptions$ = data.subscriptions;
       }
     )
     
   }
 
-  logout(){
+  signOff(id:any): void{
+    this.auth.signOff(id).then(
+      data=>{
+        if(data.message.status === 202){
+          this.toastr.success("User properly signed off the activity")
+        }
+      }
+    )
+  }
+
+  logout(): void{
     const token = this.cookieService.get('token');
     if (token) {
       this.auth.logout(token)

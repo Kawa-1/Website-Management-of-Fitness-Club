@@ -103,7 +103,13 @@ export class AuthService {
   getUserActivity(): Promise<any> {
     let url: string = this.path + "/user_activity";
     return this.http.get(url).toPromise();
-  }  
+  }
+  
+  signOff(id:any): Promise<any> {
+    let url: string = this.path + `/user_activity/${id}`;
+    return this.http.delete(url).toPromise();
+  }
+
   getUserSubs(): Promise<any> {
     let url: string = this.path + "/user_subscriptions";
     return this.http.get(url).toPromise();

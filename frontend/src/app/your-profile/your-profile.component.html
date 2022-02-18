@@ -11,4 +11,23 @@
         </p>
     </div>
     <button class="btn btn-primary" id="logout" (click)="logout()">Logout</button>
+    <br><br><br>
+
+    <div *ngFor="let activity of activities$">
+        <div class="show-stuff">
+            <p style="font-size: 140%;">{{activity.name_of_service}}</p>
+            <p>Date: {{activity.date}}</p>
+            <p>City: {{activity.fitness_city}}</p>
+            <button class="btn btn-primary" (click)=signOff(activity.id) id="button1">Sign off</button>
+        </div>
+    <br>
+    </div>
+    <div *ngFor="let subscription of subscriptions$">
+        <div class="show-stuff">
+            <p style="font-size: 140%;">{{subscription.name_of_service}}</p>
+            <p>Start date: {{subscription.start_date}}</p>
+            <p>End date: {{subscription.end_date}}</p>
+        </div>
+    <br>
+    </div>
 </div>
