@@ -7,6 +7,7 @@ from myapplication.api.auth.auth import token_required
 from myapplication import db
 from myapplication.models import Participation
 from myapplication.logger import get_logger
+from myapplication.global_helpers import limit_offset
 
 timestamp = str(datetime.utcnow())
 log = get_logger(__name__)
@@ -15,7 +16,8 @@ log = get_logger(__name__)
 class ActivityApi(Resource):
     #@token_required
     #g.user = None
-    def get(self, date=None, limit=5):
+    @limit_offset
+    def get(self, date=None):
         """Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         if we are not passing any date parameter:
             then we will receive all activities from db
@@ -28,17 +30,6 @@ class ActivityApi(Resource):
         """
         date: str
 
-        limit_ = request.args.get("limit")
-
-        if limit_ is not None:
-            try:
-                limit = int(limit_)
-            except Exception as e:
-                err_resp = {"message": {
-                    "description": "Argument limit must be int",
-                    "status": 400, "name": "invalid format of parameter limit", "method": "GET", "timestamp": timestamp}}
-                return err_resp, 400
-
         if date is None:
             cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email, 
                     (SELECT COUNT(p.id) FROM fit.participation p WHERE p.activity_id=a.id), a.id
@@ -48,7 +39,7 @@ class ActivityApi(Resource):
                     INNER JOIN fit.users u ON u.is_instructor=1 AND u.id=a.instructor_id
                     INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
                     ORDER BY a.date DESC 
-                    LIMIT %d""" % limit
+                    LIMIT %d""" % g.limit
             activity = db.session.execute(cmd).cursor.fetchall()
             if len(activity) == 0:
                 resp = {"message": {
@@ -69,11 +60,11 @@ class ActivityApi(Resource):
             return dictionary, 200
 
         err_resp = {"errors": [{"description": "Provided bad format of date",
-                                "method": "GET", "name": "Failed obtaining activities", "status": 400, "timestamp": timestamp}]}
+                                "method": "GET", "name": "Failed obtaining activities", "status": 422, "timestamp": timestamp}]}
 
         date = date.replace("_", "-")
         if not check_date_format(date) or not check_month_format(date) or not check_year_format(date):
-            return err_resp, 400
+            return err_resp, 422
 
         cmd = """SELECT a.date, t.name_of_service, f.city, f.street, f.house_number, p.price, u.first_name, u.last_name, u.email,
               (SELECT COUNT(p.user_id) FROM fit.participation p WHERE p.activity_id=a.id GROUP BY p.activity_id), a.id
@@ -84,7 +75,7 @@ class ActivityApi(Resource):
               INNER JOIN fit.types_of_services t ON t.id=a.type_of_service_id AND t.is_subscription=0
               WHERE a.date~*\'^%s.*\'
               ORDER BY a.date DESC
-              LIMIT %d """  % (date, limit)
+              LIMIT %d """  % (date, g.limit)
         activity = db.session.execute(cmd).cursor.fetchall()
         print(activity)
         print(len(activity))

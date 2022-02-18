@@ -52,13 +52,13 @@ class ValidateUserSubscription(Resource):
     @token_required
     def post(self):
         """Validating date based on date posted in body .e.g.
-        {"date": %Y-%m-%d}
+        {"date": '%Y-%m-%d'}
         """
         post_data = request.get_json()
         date_then = post_data.get('date')
 
-        check = valid_date_day(date_then)
         date_then = clean(date_then)
+        check = valid_date_day(date_then)
         if check is False:
             err_resp = {"message": {"description": "Improper format of date",
                                 "method": "POST", "name": "bad format of date", "status": 422,
@@ -87,12 +87,10 @@ class ValidateUserSubscription(Resource):
                 "subscriptions": []}
 
         for sub in user_valid_subs:
-            resp["subscriptions"].append({"id": resp[0], "start_date": resp[1], "end_date": resp[2], "name_of_service": resp[3],
-                                          "city": resp[4], "street": resp[5], "house_number": resp[6], "price": resp[7]})
+            resp["subscriptions"].append({"id": sub[0], "start_date": sub[1], "end_date": sub[2], "name_of_service": sub[3],
+                                          "city": sub[4], "street": sub[5], "house_number": sub[6], "price": sub[7], "bool": True})
 
         return resp, 200
-
-
 
 
 class RegisterUserApi(Resource):
@@ -107,6 +105,7 @@ class RegisterUserApi(Resource):
         password = request.form.get("password")
         repeat_password = request.form.get("repeat_password")
 
+        email = clean(email)
         # [(1, 'Kamil', 'Kamilowy', 'BC', 'naulicy', 9, '40', 'tarantino@o2.com', 'plain_text_pass', None, None)]
         user = Users.query.filter_by(email=email).first()
         print(user)
@@ -123,38 +122,38 @@ class RegisterUserApi(Resource):
 
         if check_email(email) is False:
             err_resp = {"message": {"description": "Format of email is incorrect",
-                                    "method": "POST", "name": "Failed registration", "status": 400,
+                                    "method": "POST", "name": "Failed registration", "status": 422,
                                     "timestamp": timestamp}}
             return err_resp, 422
 
         if user:
             err_resp = {"message": {"description": "Such user already exists",
-                                    "method": "POST", "name": "Failed registration", "status": 400,
+                                    "method": "POST", "name": "Failed registration", "status": 409,
                                     "timestamp": timestamp}}
             return err_resp, 409
 
         if len(first_name) > 30 or len(first_name) < 2 or len(last_name) > 30 or len(last_name) < 2 or len(city) > 30 or len(city) < 2 or\
             len(street) > 30 or len(street) < 2 or len(password) > 30 or len(password) < 8:
             err_resp = {"message": {"description": "Provided empty field, bad semantics, something exists so far etc.",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
+                                   "method": "POST", "name": "Failed registration", "status": 422,
                                    "timestamp": timestamp}}
             return err_resp, 422
 
         if check_postcode(postcode) is False:
             err_resp = {"message": {"description": "Check postcode failed",
-                        "method": "POST", "name": "Failed registration", "status": 400,
+                        "method": "POST", "name": "Failed registration", "status": 422,
                         "timestamp": timestamp}}
             return err_resp, 422
 
         if password != repeat_password:
             err_resp = {"message": {"description": "Passwords are not correct",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
+                                   "method": "POST", "name": "Failed registration", "status": 422,
                                    "timestamp": timestamp}}
             return err_resp, 422
 
         if check_number(house_number) is False:
             err_resp = {"message": {"description": "Check house number failed",
-                                   "method": "POST", "name": "Failed registration", "status": 400,
+                                   "method": "POST", "name": "Failed registration", "status": 422,
                                    "timestamp": timestamp}}
             return err_resp, 422
 
@@ -164,7 +163,6 @@ class RegisterUserApi(Resource):
         street = clean(street)
         house_number = clean(house_number)
         postcode = clean(postcode)
-        email = clean(email)
         password = clean(password)
 
 

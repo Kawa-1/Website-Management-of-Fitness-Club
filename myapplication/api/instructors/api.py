@@ -60,10 +60,10 @@ class InstructorsApi(Resource):
         if check_email(email) is False:
             err_resp = {
                 "message": {"description": "Bad format of email!", "name": "lack of instructors",
-                            "status": 400, "method": "GET", "timestamp": timestamp},
+                            "status": 422, "method": "GET", "timestamp": timestamp},
                 "activities": [],
                 "instructor": {}}
-            return err_resp, 400
+            return err_resp, 422
 
         cmd = """SELECT u.first_name, u.last_name, u.email, f.city, f.street, f.house_number, f.postcode, f.contact_number,
                     f.email, a.date, t.name_of_service
