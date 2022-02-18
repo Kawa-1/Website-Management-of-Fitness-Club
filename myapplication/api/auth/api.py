@@ -70,7 +70,7 @@ class ValidateUserSubscription(Resource):
                 INNER JOIN fit.types_of_services t ON s.service_id=t.id
                 INNER JOIN fit.facilities f ON s.facility_id=f.id
                 INNER JOIN fit.price_list pr ON s.price_id=pr.id
-                WHERE \'%s\' BETWEEN s.start_date AND s.end_date AND s.user_id=%d
+                WHERE %s BETWEEN s.start_date AND s.end_date AND s.user_id=%d
                 ORDER BY s.start_date DESC""" % (date_then, g.user.id)
 
         user_valid_subs = db.session.execute(cmd).cursor.fetchall()
