@@ -115,10 +115,10 @@
         <p>Participants: {{activity.total_number_of_users}} / 15</p>
         <div class="parent">
             <div class="child">
-                <button class="btn btn-primary" id="button1" [hidden]="isInstructor" [disabled]="!isLoggedIn" (click)="signUp(activity.id)">Sign up ({{activity.price}} $)</button>
+                <button class="btn btn-primary" id="button1" [disabled]="!isLoggedIn || isInstructor" (click)="signUp(activity.id)">Sign up ({{activity.price}} $)</button>
             </div>
             <div class="child">
-                <button class="btn btn-primary" id="button1" [hidden]="isInstructor" [disabled]="!isLoggedIn" (click)="useSub(activity.id, activity.date)">I have a subscription</button> 
+                <button class="btn btn-primary" id="button1" [disabled]="!isLoggedIn || isInstructor" (click)="useSub(activity.id, activity.date)">I have a subscription</button> 
             </div>
         </div>
     </div>
