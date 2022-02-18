@@ -92,7 +92,7 @@
 <div *ngFor="let activity of allActvities$">
     <div class="show-stuff">
         <p style="font-size: 140%;">{{activity.type_of_service}} </p>
-        <p>Date: {{activity.date}}</p>
+        <p>Date: {{activity.date}} pm</p>
         <p>Instructor: {{activity.first_name}} {{activity.last_name}}</p>
         <p>Participants: {{activity.total_number_of_users}} / 15</p>
         <div class="parent">
@@ -104,6 +104,7 @@
             </div>
         </div>
     </div>
+    <br>
 </div>
 
 

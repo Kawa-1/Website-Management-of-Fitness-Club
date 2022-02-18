@@ -67,7 +67,7 @@ export class ActivitiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    for (let i = 12; i < 21; i++) {
+    for (let i = 13; i < 22; i++) {
       this.hours$.push(i)
     }
 
@@ -138,7 +138,7 @@ export class ActivitiesComponent implements OnInit {
 
       this.auth.addActivity(formData).subscribe(
         data => {
-            this.toastr.success('Added activity');
+          this.toastr.success('Added activity');
         }
       );
 
@@ -169,7 +169,7 @@ export class ActivitiesComponent implements OnInit {
 
   useSub(id:any, date:any):void {
     let bodyDate = new BodyDate
-    bodyDate.date = date;
+    bodyDate.date = date.substring(0,11);
     this.auth.checkIfSubbed(bodyDate).then(
       data=>{
         console.log(data)
