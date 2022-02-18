@@ -36,6 +36,7 @@ class ActivityApi(Resource):
         date: str
         since_today: int
 
+        # arg is passed as a string from angular
         since_today = request.args.get('since_today')
 
         if since_today is not None:

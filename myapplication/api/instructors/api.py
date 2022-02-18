@@ -118,9 +118,9 @@ class InstructorsApi(Resource):
         instructor_id = g.user.id
         facility_id = request.form.get('facility_id')
         #price_id = request.form.get('price_id')
-
+        print('1 ', date)
         date = clean(date)
-
+        print('2 ', date)
         if not valid_date_H_M(date):
             err_resp = {
                 "message": {"description": "Bad format of date", "name": "Format of date is improper",
