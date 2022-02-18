@@ -5,9 +5,10 @@ from myapplication import db
 from datetime import datetime
 from myapplication.api.instructors.api import check_int
 from myapplication.models import Participation
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
-
+log = get_logger(__name__)
 
 class UserActivityApi(Resource):
     @token_required

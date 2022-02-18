@@ -2,9 +2,10 @@ from flask import g
 from flask_restful import Resource
 from datetime import datetime
 from myapplication import db
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
-
+log = get_logger(__name__)
 
 class PriceOnService(Resource):
     def get(self, service_id=None):

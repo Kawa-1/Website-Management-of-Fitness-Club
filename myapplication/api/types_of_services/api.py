@@ -2,8 +2,10 @@ from flask import request, g
 from flask_restful import Resource
 from myapplication import db
 from datetime import datetime
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
+log = get_logger(__name__)
 
 class ServiceSubscription(Resource):
     def get(self):

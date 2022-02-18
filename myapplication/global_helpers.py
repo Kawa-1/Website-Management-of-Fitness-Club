@@ -38,8 +38,8 @@ def limit_offset(f):
 
 def valid_date_day(date: str) -> bool:
     """Check if such date exists in format: "%Y-%m-%d"""
-    year, month, day = date.split('-')
     try:
+        year, month, day = date.split('-')
         datetime(int(year), int(month), int(day))
         return True
 
@@ -48,10 +48,11 @@ def valid_date_day(date: str) -> bool:
 
 def valid_date_H_M(date: str) -> bool:
     """Check if such date exists in format: "%Y-%m-%d %H-%M"""
-    year, month, day, hour, minutes = date.split('-')
-
     try:
-        datetime(int(year), int(month), int(day), int(hour), int(minutes))
+        date = date.split(' ')
+        year, month, day = date[0].split('-')
+        hour, minute = date[1].split('-')
+        datetime(int(year), int(month), int(day), int(hour), int(minute))
         return True
 
     except Exception:

@@ -6,8 +6,10 @@ from myapplication.api.activities.check import check_date_format, check_month_fo
 from myapplication.api.auth.auth import token_required
 from myapplication import db
 from myapplication.models import Participation
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
+log = get_logger(__name__)
 
 # class involved with activities (classes ~ activity involved with fitness) table
 class ActivityApi(Resource):

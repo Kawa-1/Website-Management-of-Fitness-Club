@@ -9,8 +9,10 @@ from myapplication import db
 from myapplication.models import Users, BlackListToken
 from myapplication.error_handler.err_handler import error_handler
 from myapplication.global_helpers import valid_date_day
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
+log = get_logger(__name__)
 
 
 class Test(Resource):

@@ -7,8 +7,10 @@ from myapplication import db
 from myapplication.api.auth.auth import check_email, token_required
 from myapplication.api.instructors.helpers import check_int, check_date_activities
 from myapplication.global_helpers import limit_offset, valid_date_H_M
+from myapplication.logger import get_logger
 
 timestamp = str(datetime.utcnow())
+log = get_logger(__name__)
 
 class InstructorsApi(Resource):
     @limit_offset

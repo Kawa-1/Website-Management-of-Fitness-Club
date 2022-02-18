@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 from myapplication.api.activities.check import check_date_format
 from myapplication.models import Subscriptions
 from myapplication.global_helpers import valid_date_day
+from myapplication.logger import get_logger
 from bleach import clean
 
 timestamp = str(datetime.utcnow())
+log = get_logger(__name__)
 
 class StartSubscription(Resource):
     @token_required

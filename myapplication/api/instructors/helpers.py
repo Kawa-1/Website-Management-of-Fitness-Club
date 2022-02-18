@@ -9,7 +9,7 @@ def check_date_activities(date: str) -> bool:
     else:
         return False
 
-
+# we can also use isinstance(variable, int)
 def check_int(**kwargs):
     """Purpose of this function is to check requested values if they are really int
         PARAMETERS:
