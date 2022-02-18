@@ -169,10 +169,25 @@ export class ActivitiesComponent implements OnInit {
 
   useSub(id:any, date:any):void {
     let bodyDate = new BodyDate
-    bodyDate.date = date.substring(0,11);
+    bodyDate.date = date.substring(0,10);
+    let bodyId = new BodyId();
+    bodyId.id = id;
     this.auth.checkIfSubbed(bodyDate).then(
       data=>{
-        console.log(data)
+        if(data.message.description ==='Valid subscriptions returned'){
+          this.auth.signUpActivity(bodyId).then(
+            data=>{
+              if(data.message.status === 201){
+                this.toastr.success("Succesfully signed on with subscription")
+              }
+              else{
+                this.toastr.error(data.message.description)
+              }
+          })
+        }
+        else{
+          this.toastr.error("Buy a subscription first")
+        }
       }
     )
   }
