@@ -150,9 +150,10 @@ class UserOnSubscription(Resource):
         if len(subscriptions) == 0:
             resp = {"message": {
                 "description": "User has no subscriptions",
-                "status": 204, "name": "lack of subscriptions", "method": "GET",
+                "status": 200, "name": "lack of subscriptions", "method": "GET",
                 "timestamp": timestamp}}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         resp = {"message": {"description": "Subscriptions made by user", "name": "Subscriptions returne", "status": 200,
                                   "method": "GET", "timestamp": timestamp}, "subscriptions": []}

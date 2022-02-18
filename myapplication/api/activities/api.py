@@ -44,8 +44,9 @@ class ActivityApi(Resource):
             if len(activity) == 0:
                 resp = {"message": {
                     "description": "There are no activities at all",
-                    "status": 204, "name": "lack of activities", "method": "GET", "timestamp": timestamp}}
-                return resp, 204
+                    "status": 200, "name": "lack of activities", "method": "GET", "timestamp": timestamp}}
+                # 204 should be
+                return resp, 200
 
             dictionary = {"message": {"description": "Activities returned", "name": "Activities returned", "status": 200,
                                       "method": "GET", "timestamp": timestamp}, "activities": []}
@@ -81,9 +82,10 @@ class ActivityApi(Resource):
         print(len(activity))
         # It means there is no activities that day
         if len(activity) == 0:
-            resp = {"message": {"description": "There are no activities", "status": 204, "method": "GET",
+            resp = {"message": {"description": "There are no activities", "status": 200, "method": "GET",
                                 "timestamp": timestamp}}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         dictionary = {"message": {"description": "Activities returned", "name": "Activities returned", "status": 200,
                                   "method": "GET", "timestamp": timestamp}, "activities": []}

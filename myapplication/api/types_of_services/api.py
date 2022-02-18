@@ -16,9 +16,10 @@ class ServiceSubscription(Resource):
             resp = {
                 "message": {"description": "Subscriptions don't exist!",
                             "name": "lack of subscriptions",
-                            "status": 204, "method": "GET", "timestamp": timestamp},
+                            "status": 200, "method": "GET", "timestamp": timestamp},
             "subscriptions": []}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         resp = {
             "message": {"description": "Subscriptions returned!",
@@ -41,9 +42,10 @@ class ServiceActivity(Resource):
             resp = {
                 "message": {"description": "Activities don't exist!",
                             "name": "lack of activities",
-                            "status": 204, "method": "GET", "timestamp": timestamp},
+                            "status": 200, "method": "GET", "timestamp": timestamp},
                 "activities": []}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         resp = {
             "message": {"description": "Activities returned!",

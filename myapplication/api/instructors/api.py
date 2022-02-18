@@ -20,9 +20,10 @@ class InstructorsApi(Resource):
 
         if len(instructors) == 0:
             resp = {"message": {"description": "There is not even single instructor!", "name": "lack of instructors",
-                                "status": 204, "method": "GET", "timestamp": timestamp},
+                                "status": 200, "method": "GET", "timestamp": timestamp},
                     "instructors": []}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         resp = {"message": {"description": "Instructors returned!", "name": "instructors",
                             "status": 200, "method": "GET", "timestamp": timestamp},
@@ -45,10 +46,11 @@ class InstructorsApi(Resource):
 
         if user is None:
             err_resp = {"message": {"description": "There is not even single instructor!", "name": "lack of instructors",
-                                "status": 204, "method": "GET", "timestamp": timestamp},
+                                "status": 200, "method": "GET", "timestamp": timestamp},
                     "activities": [],
                     "instructor": {}}
-            return err_resp, 204
+            # 204 should be
+            return err_resp, 200
         if email is None:
             err_resp = {
                 "message": {"description": "Please provide json in body; optionally limit and offset, but email is a must!",
@@ -79,10 +81,11 @@ class InstructorsApi(Resource):
         if len(instructors_activities) == 0:
             resp = {"message": {"description": "There are no activities involved with this instructor!",
                                 "name": "activities&facilities {}".format(email),
-                                "status": 204, "method": "POST", "timestamp": timestamp},
+                                "status": 200, "method": "POST", "timestamp": timestamp},
                     "activities": [],
                     "instructor": {"email": email}}
-            return resp, 204
+            # 204 should be
+            return resp, 200
 
         resp = {"message": {"description": "activities & facilities returned!", "name": "activities&facilities {}".format(email),
                             "status": 200, "method": "POST", "timestamp": timestamp},
