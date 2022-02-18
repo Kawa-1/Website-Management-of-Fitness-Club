@@ -17,7 +17,7 @@ class ActivityApi(Resource):
     #@token_required
 
     @limit_offset
-    def get(self, date=None, since_today=None):
+    def get(self, date=None):
         """
         Date parameter should be passed like: Year_Month_Day e.g. 2021_02_09 (YYYY_MM_DD) then we will receive all acitivites during this day
         OR
@@ -35,6 +35,8 @@ class ActivityApi(Resource):
         """
         date: str
         since_today: int
+
+        since_today = request.args.get('since_today')
 
         if since_today is not None:
             if date is not None:

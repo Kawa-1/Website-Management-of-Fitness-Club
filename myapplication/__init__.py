@@ -73,7 +73,8 @@ def create_app():
     api.add_resource(UserActivityApi, "/api/user_activity/<int:activity_id>", "/api/user_activity")
 
     from myapplication.api.activities.api import ActivityApi
-    api.add_resource(ActivityApi, "/api/activity_api/<string:date>", "/api/activity_api", "/api/activity_api/<int:since_today>")
+    api.add_resource(ActivityApi, "/api/activity_api/<string:date>", "/api/activity_api", "/api/activity_api/")
+    #api.add_resource(ActivityApi, "/api/activity_api", "/api/activity_api/<int:since_today>")
 
     from myapplication.api.instructors.api import InstructorsApi
     api.add_resource(InstructorsApi, "/api/instructors")
