@@ -56,9 +56,9 @@ class ValidateUserSubscription(Resource):
         """
         post_data = request.get_json()
         date_then = post_data.get('date')
-
         date_then = clean(date_then)
         check = valid_date_day(date_then)
+        print(date_then)
         if check is False:
             err_resp = {"message": {"description": "Improper format of date",
                                 "method": "POST", "name": "bad format of date", "status": 422,
@@ -74,11 +74,12 @@ class ValidateUserSubscription(Resource):
                 ORDER BY s.start_date DESC""" % (date_then, g.user.id)
 
         user_valid_subs = db.session.execute(cmd).cursor.fetchall()
-
+        print(user_valid_subs)
         if len(user_valid_subs) == 0:
             resp = {"message": {"description": "User has no valid subscriptions right now",
                                    "method": "POST", "name": "Lack of subscriptions", "status": 204,
                                    "timestamp": timestamp}}
+            print(resp)
             return resp, 204
 
         resp = {"message": {"description": "Valid subscriptions returned",
@@ -88,8 +89,8 @@ class ValidateUserSubscription(Resource):
 
         for sub in user_valid_subs:
             resp["subscriptions"].append({"id": sub[0], "start_date": sub[1], "end_date": sub[2], "name_of_service": sub[3],
-                                          "city": sub[4], "street": sub[5], "house_number": sub[6], "price": sub[7], "bool": True})
-
+                                          "city": sub[4], "street": sub[5], "house_number": sub[6], "price": sub[7], "bool": 'True'})
+        print(resp)
         return resp, 200
 
 
