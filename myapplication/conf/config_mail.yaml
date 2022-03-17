@@ -1,4 +1,4 @@
-# MOST SECURE OPTION IS TO HOLD PASSWORD IN ENVIRONMENT VARS
+# MORE SECURE OPTION IS TO STORE PASSWORD IN ENVIRONMENT VARS
 mail:
   mail_server: smtp.gmail.com
   mail_username: fitness_management
